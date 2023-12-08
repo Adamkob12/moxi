@@ -20,7 +20,6 @@ If your bug is rendering-related, copy the adapter info that appears when you ru
 `AdapterInfo { name: "NVIDIA GeForce RTX 2070", vendor: 4318, device: 7938, device_type: DiscreteGpu, backend: Vulkan }`
 ```
 
-You should also consider testing the bevy examples to get a better understanding of what could be causing the issue.
 
 ## What you did
 

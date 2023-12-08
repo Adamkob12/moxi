@@ -6,7 +6,7 @@ labels: documentation, Needs-Triage
 assignees: ''
 ---
 
-## How can NovaCraft's documentation be improved?
+## How can Moxi's documentation be improved?
 
 Provide a link to the documentation and describe how it could be improved. In what ways is it incomplete, incorrect, or misleading?
 
