@@ -27,6 +27,7 @@ license = "MIT"
 resolver = "2"
 
 [dependencies]
+moxi_core = { path = "crates/moxi_core" }
 
 [features]
 default = ["standard_sdk"]

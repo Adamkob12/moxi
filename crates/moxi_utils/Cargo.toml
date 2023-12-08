@@ -6,3 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy_math = "0.12"
+
+[features]
+default = ["block_id_16"]
+# Bits per block id
+block_id_8 = []
+block_id_16 = []
+block_id_32 = []
+block_id_64 = []

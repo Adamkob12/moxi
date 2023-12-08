@@ -1,4 +1,3 @@
-fn_args_layout = "Vertical"
 fn_single_line = true
 combine_control_expr = false
 condense_wildcard_suffixes = true
