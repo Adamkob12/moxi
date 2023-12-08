@@ -1,5 +1,14 @@
-pub mod minimal_sdk {}
+mod minimal_sdk {}
 
-pub mod standard_sdk {}
+mod standard_sdk {}
 
-pub mod full_sdk {}
+mod complete_sdk {}
+
+pub mod prelude {
+    #[cfg(feature = "complete_sdk")]
+    pub use crate::complete_sdk::*;
+    #[cfg(feature = "minimal_sdk")]
+    pub use crate::minimal_sdk::*;
+    #[cfg(feature = "standard_sdk")]
+    pub use crate::standard_sdk::*;
+}
