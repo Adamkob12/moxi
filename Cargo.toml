@@ -28,6 +28,7 @@ resolver = "2"
 
 [dependencies]
 moxi_core = { path = "crates/moxi_core" }
+moxi_app = { path = "crates/moxi_app" }
 
 [features]
 default = ["standard_sdk"]

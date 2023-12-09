@@ -6,7 +6,3 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-moxi_bpt = { path = "../moxi_bpt" }
-moxi_effects = { path = "../moxi_effects" }
-moxi_utils = { path = "../moxi_utils" }
-moxi_mesh_utils = { path = "../moxi_mesh_utils" }
