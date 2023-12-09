@@ -12,6 +12,8 @@ pub mod prelude {
 }
 
 pub mod block {
+    /// A trait that represents a block in the grid. It doesn't have to be the block itself, just
+    /// an id that represents the block and is unique, and sized, and ideally lightweight.
     pub trait BlockInGrid: Copy + Sized + Eq + PartialEq {}
 
     #[cfg(feature = "block_id_8")]

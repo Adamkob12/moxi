@@ -105,7 +105,7 @@ pub(crate) fn apply_sl_quad(
 pub fn apply_smooth_lighting<T: BlockInGrid, const N: usize>(
     reg: &impl MeshRegistry<T>,
     mesh: &mut Mesh,
-    metadata: &MeshMD<T>,
+    metadata: &CubeMD<T>,
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,
@@ -133,7 +133,7 @@ pub fn apply_smooth_lighting<T: BlockInGrid, const N: usize>(
 pub fn apply_smooth_lighting_with_connected_chunks<'a, T: BlockInGrid, const N: usize>(
     reg: &impl MeshRegistry<T>,
     mesh: &mut Mesh,
-    metadata: &MeshMD<T>,
+    metadata: &CubeMD<T>,
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,

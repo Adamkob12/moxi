@@ -8,6 +8,8 @@ const EMPTY_AABB: Aabb = Aabb {
 };
 
 /// An enum that represents the different types of meshes that can be used to represent a block.
+/// This enum will not be in any SDK, because the user will be able to define incompatible
+/// BlockMeshes, for example, a custom mesh inside a [`BlockMeshType::Cube`].
 pub enum BlockMesh {
     /// [`BlockMeshType::Cube`]
     Cube(Mesh),
@@ -44,17 +46,6 @@ pub enum BlockMeshRef<'a> {
     XSprite(&'a Mesh),
     /// [`BlockMeshType::Air`]
     Air,
-}
-
-impl<'a> Into<Option<&'a Mesh>> for BlockMeshRef<'a> {
-    fn into(self) -> Option<&'a Mesh> {
-        match self {
-            BlockMeshRef::Cube(mesh) => Some(mesh),
-            BlockMeshRef::Custom(mesh) => Some(mesh),
-            BlockMeshRef::XSprite(mesh) => Some(mesh),
-            BlockMeshRef::Air => None,
-        }
-    }
 }
 
 /// An enum that represents the different types of meshes that can be used to represent a block.
@@ -116,10 +107,7 @@ impl<'a> BlockMeshRef<'a> {
         }
     }
 
-    pub fn get_if(
-        &self,
-        mesh_type: BlockMeshType,
-    ) -> Option<&'a Mesh> {
+    pub fn get_if(&self, mesh_type: BlockMeshType) -> Option<&'a Mesh> {
         match self {
             BlockMeshRef::Cube(mesh) if mesh_type == BlockMeshType::Cube => Some(mesh),
             BlockMeshRef::Custom(mesh) if mesh_type == BlockMeshType::Custom => Some(mesh),
@@ -161,6 +149,36 @@ impl<'a> BlockMeshRef<'a> {
             BlockMeshRef::Custom(mesh) => mesh.indices().map_or(0, |i| i.len()),
             BlockMeshRef::XSprite(mesh) => mesh.indices().map_or(0, |i| i.len()),
             BlockMeshRef::Air => 0,
+        }
+    }
+
+    /// Get the mesh as an option.
+    pub fn as_option(self) -> Option<&'a Mesh> {
+        match self {
+            BlockMeshRef::Cube(mesh) => Some(mesh),
+            BlockMeshRef::Custom(mesh) => Some(mesh),
+            BlockMeshRef::XSprite(mesh) => Some(mesh),
+            BlockMeshRef::Air => None,
+        }
+    }
+
+    /// Unwrap the mesh.
+    pub fn unwrap(self) -> &'a Mesh {
+        match self {
+            BlockMeshRef::Cube(mesh) => mesh,
+            BlockMeshRef::Custom(mesh) => mesh,
+            BlockMeshRef::XSprite(mesh) => mesh,
+            BlockMeshRef::Air => panic!("Called unwrap on air mesh"),
+        }
+    }
+
+    /// Unwrap the mesh with a custom error message.
+    pub fn expect(self, msg: &str) -> &'a Mesh {
+        match self {
+            BlockMeshRef::Cube(mesh) => mesh,
+            BlockMeshRef::Custom(mesh) => mesh,
+            BlockMeshRef::XSprite(mesh) => mesh,
+            BlockMeshRef::Air => panic!("{}", msg),
         }
     }
 }

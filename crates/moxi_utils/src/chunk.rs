@@ -26,10 +26,7 @@ pub struct BlockGlobalPos {
 pub type BlockTrans = Vec3;
 
 impl BlockGlobalPos {
-    pub fn new(
-        block_pos: BlockPos,
-        chunk_cords: ChunkCords,
-    ) -> Self {
+    pub fn new(block_pos: BlockPos, chunk_cords: ChunkCords) -> Self {
         Self {
             pos: block_pos,
             chunk_cords,
@@ -38,57 +35,53 @@ impl BlockGlobalPos {
     }
 }
 
+/// Data type to represent the 6 neighbors of a block, one for each face (side), in the order:
+/// top, bottom, right, left, back, front
+/// Can also be indexed by a [`Face`]. If the block is on the edge of the chunk, the neighbor
+/// towards that direction (out of bounds of the chunk) will be None.
+pub type SurroundingBlocks<T> = [Option<T>; 6];
+
+impl<B> std::ops::Index<Face> for SurroundingBlocks<B> {
+    type Output = Option<B>;
+
+    fn index(&self, face: Face) -> &Self::Output {
+        match face {
+            Face::Top => &self[0],
+            Face::Bottom => &self[1],
+            Face::Right => &self[2],
+            Face::Left => &self[3],
+            Face::Back => &self[4],
+            Face::Front => &self[5],
+        }
+    }
+}
+
 impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
-    pub fn get_block(
-        &self,
-        block_pos: BlockPos,
-    ) -> Option<T> {
+    pub fn get_block(&self, block_pos: BlockPos) -> Option<T> {
         pos_to_index(block_pos, self.dims).map(|i| self.grid[i])
     }
 
-    pub fn get_block_mut<'a>(
-        &'a mut self,
-        block_pos: BlockPos,
-    ) -> Option<&'a mut T> {
+    pub fn get_block_mut<'a>(&'a mut self, block_pos: BlockPos) -> Option<&'a mut T> {
         pos_to_index(block_pos, self.dims).map(|i| &mut self.grid[i])
     }
 
-    pub fn get_block_or(
-        &self,
-        block_pos: BlockPos,
-        default: T,
-    ) -> T {
+    pub fn get_block_or(&self, block_pos: BlockPos, default: T) -> T {
         pos_to_index(block_pos, self.dims).map_or(default, |i| self.grid[i])
     }
 
-    pub fn get_neighbor_of(
-        &self,
-        block_pos: BlockPos,
-        face: Face,
-    ) -> Option<T> {
+    pub fn get_neighbor_of(&self, block_pos: BlockPos, face: Face) -> Option<T> {
         neighbor_index(block_pos, face, self.dims).map(|i| self.grid[i])
     }
 
-    pub fn get_neighbor_of_or(
-        &self,
-        block_pos: BlockPos,
-        face: Face,
-        default: T,
-    ) -> T {
+    pub fn get_neighbor_of_or(&self, block_pos: BlockPos, face: Face, default: T) -> T {
         self.get_neighbor_of(block_pos, face).unwrap_or(default)
     }
 
-    pub fn enumerate_blocks_on_edge(
-        &self,
-        edge: Face,
-    ) -> impl Iterator<Item = (BlockPos, T)> + '_ {
+    pub fn enumerate_blocks_on_edge(&self, edge: Face) -> impl Iterator<Item = (BlockPos, T)> + '_ {
         iter_blocks_on_edge(edge, self.dims).map(|pos| (pos, self.get_block(pos).unwrap()))
     }
 
-    pub fn iter_blocks_on_edge(
-        &self,
-        edge: Face,
-    ) -> impl Iterator<Item = BlockPos> {
+    pub fn iter_blocks_on_edge(&self, edge: Face) -> impl Iterator<Item = BlockPos> {
         iter_blocks_on_edge(edge, self.dims)
     }
 
@@ -101,10 +94,7 @@ impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
             })
     }
 
-    pub fn get_neighbors(
-        &self,
-        block_pos: BlockPos,
-    ) -> [Option<T>; 6] {
+    pub fn get_neighbors(&self, block_pos: BlockPos) -> SurroundingBlocks<T> {
         let mut neighbors = [None; 6];
         for (i, face) in FACES.iter().enumerate() {
             neighbors[i] = self.get_neighbor_of(block_pos, *face);
@@ -112,11 +102,7 @@ impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
         neighbors
     }
 
-    pub fn get_neighbors_or(
-        &self,
-        block_pos: BlockPos,
-        default: T,
-    ) -> [T; 6] {
+    pub fn get_neighbors_or(&self, block_pos: BlockPos, default: T) -> [T; 6] {
         let mut neighbors = [default; 6];
         for (i, face) in FACES.iter().enumerate() {
             neighbors[i] = self.get_neighbor_of_or(block_pos, *face, default);
@@ -124,10 +110,7 @@ impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
         neighbors
     }
 
-    pub fn enumerate_neighbors(
-        &self,
-        block_pos: BlockPos,
-    ) -> [(Face, Option<T>); 6] {
+    pub fn enumerate_neighbors(&self, block_pos: BlockPos) -> [(Face, Option<T>); 6] {
         let mut neighbors = [(Face::Top, None); 6];
         for (i, face) in FACES.iter().enumerate() {
             neighbors[i] = (*face, self.get_neighbor_of(block_pos, *face));
@@ -139,18 +122,11 @@ impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
         (self.dims.x * self.dims.y * self.dims.z) as usize
     }
 
-    pub const fn new(
-        grid: [T; N],
-        dims: Dimensions,
-    ) -> Self {
+    pub const fn new(grid: [T; N], dims: Dimensions) -> Self {
         Self { dims, grid }
     }
 
-    pub fn set_block(
-        &mut self,
-        block: T,
-        block_pos: BlockPos,
-    ) -> Result<(), ()> {
+    pub fn set_block(&mut self, block: T, block_pos: BlockPos) -> Result<(), ()> {
         if let Some(block_index) = pos_to_index(block_pos, self.dims) {
             self.grid[block_index] = block;
             return Ok(());
@@ -197,10 +173,7 @@ pub fn enumerate_neighbors_across_chunks(
     })
 }
 
-pub fn iter_blocks_on_edge(
-    edge: Face,
-    dims: Dimensions,
-) -> impl Iterator<Item = BlockPos> {
+pub fn iter_blocks_on_edge(edge: Face, dims: Dimensions) -> impl Iterator<Item = BlockPos> {
     (0..(dims.x * dims.y * dims.z))
         .into_iter()
         .filter_map(move |i| {
@@ -213,11 +186,7 @@ pub fn iter_blocks_on_edge(
         .into_iter()
 }
 
-pub fn is_block_pos_on_edge(
-    mut block_pos: BlockPos,
-    edge: Face,
-    dims: Dimensions,
-) -> bool {
+pub fn is_block_pos_on_edge(mut block_pos: BlockPos, edge: Face, dims: Dimensions) -> bool {
     match edge {
         Face::Top => block_pos.y += 1,
         Face::Bottom => block_pos.y -= 1,
@@ -229,18 +198,11 @@ pub fn is_block_pos_on_edge(
     !pos_in_bounds(block_pos, dims)
 }
 
-fn is_block_index_on_edge(
-    block_index: BlockIndex,
-    edge: Face,
-    dims: Dimensions,
-) -> bool {
+fn is_block_index_on_edge(block_index: BlockIndex, edge: Face, dims: Dimensions) -> bool {
     index_to_pos(block_index, dims).map_or(false, |pos| is_block_pos_on_edge(pos, edge, dims))
 }
 
-pub const fn index_to_pos(
-    block_index: BlockIndex,
-    dims: Dimensions,
-) -> Option<BlockPos> {
+pub const fn index_to_pos(block_index: BlockIndex, dims: Dimensions) -> Option<BlockPos> {
     let height = dims.y;
     let length = dims.z;
     let width = dims.x;
@@ -256,17 +218,11 @@ pub const fn index_to_pos(
     Some(UVec3::new(w, h, l))
 }
 
-pub const fn pos_in_bounds(
-    block_pos: UVec3,
-    dims: Dimensions,
-) -> bool {
+pub const fn pos_in_bounds(block_pos: UVec3, dims: Dimensions) -> bool {
     !(block_pos.x >= dims.x || block_pos.y >= dims.y || block_pos.z >= dims.z)
 }
 
-pub const fn pos_to_index(
-    block_pos: UVec3,
-    dims: Dimensions,
-) -> Option<BlockIndex> {
+pub const fn pos_to_index(block_pos: UVec3, dims: Dimensions) -> Option<BlockIndex> {
     if block_pos.x >= dims.x || block_pos.y >= dims.y || block_pos.z >= dims.z {
         None
     } else {
@@ -274,11 +230,7 @@ pub const fn pos_to_index(
     }
 }
 
-fn neighbor_index(
-    mut block_pos: BlockPos,
-    face: Face,
-    dims: Dimensions,
-) -> Option<BlockIndex> {
+fn neighbor_index(mut block_pos: BlockPos, face: Face, dims: Dimensions) -> Option<BlockIndex> {
     match face {
         Face::Top => block_pos.y += 1,
         Face::Bottom => block_pos.y -= 1,
@@ -290,11 +242,7 @@ fn neighbor_index(
     pos_to_index(block_pos, dims)
 }
 
-pub fn neighbor_pos(
-    mut block_pos: BlockPos,
-    face: Face,
-    dims: Dimensions,
-) -> Option<BlockPos> {
+pub fn neighbor_pos(mut block_pos: BlockPos, face: Face, dims: Dimensions) -> Option<BlockPos> {
     match face {
         Face::Top => block_pos.y += 1,
         Face::Bottom => block_pos.y -= 1,
@@ -311,10 +259,7 @@ pub fn neighbor_pos(
 }
 
 /// Assumes each block is [1, 1, 1]
-pub fn point_to_chunk_cords(
-    point: Vec3,
-    chunk_dims: Dimensions,
-) -> ChunkCords {
+pub fn point_to_chunk_cords(point: Vec3, chunk_dims: Dimensions) -> ChunkCords {
     let chunk_width = chunk_dims.x;
     let chunk_length = chunk_dims.z;
     let x = point.x + 0.5;
@@ -327,10 +272,7 @@ pub fn point_to_chunk_cords(
 }
 
 /// the bool is for whether or not the pos is within the height bounds
-pub fn point_to_global_block_pos(
-    point: Vec3,
-    chunk_dims: Dimensions,
-) -> BlockGlobalPos {
+pub fn point_to_global_block_pos(point: Vec3, chunk_dims: Dimensions) -> BlockGlobalPos {
     let chunk_width = chunk_dims.x;
     let chunk_length = chunk_dims.z;
     let chunk_height = chunk_dims.y;
@@ -403,10 +345,7 @@ pub fn global_neighbor(
     global_pos
 }
 
-pub fn adj_chunk(
-    chunk_cords: ChunkCords,
-    face: Face,
-) -> ChunkCords {
+pub fn adj_chunk(chunk_cords: ChunkCords, face: Face) -> ChunkCords {
     match face {
         Face::Top | Face::Bottom => chunk_cords,
         Face::Back => chunk_cords + IVec2::from([0, 1]),

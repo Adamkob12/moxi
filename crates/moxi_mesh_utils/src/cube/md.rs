@@ -6,7 +6,7 @@
 
 use crate::*;
 
-/// A struct data structure specifically for cubic meshes (made up of BlockMeshType::Cube) that
+/// A struct data structure specifically for cubic meshes (made up of [`BlockMeshType::Cube`]) that
 /// keeps track of which vertices belong to which block. This is used for culling & updating the mesh at run-time.
 pub(crate) struct CubeVIVI {
     /// The VIVI data structure. VIVI stands for Voxel Index Vertex Index.
@@ -84,33 +84,24 @@ impl CubeVIVI {
     }
 }
 
-/// This enum represents all the way a voxel could be changed.
-#[derive(Clone, Copy)]
-pub enum VoxelChange {
-    Broken,
-    Added,
-    CullFaces,
-    AddFaces,
-}
-
-/// Mesh meta-data struct.
-/// T is the voxel type, it needs to be the same as the voxel registry.
-pub struct MeshMD<T: BlockInGrid> {
+/// Mesh meta-data struct for cubic meshes (made up of [`BlockMeshType::Cube`]).
+/// Holds all the information needed to update the mesh at run-time.
+pub struct CubeMD<B: BlockInGrid> {
     pub(crate) vivi: CubeVIVI,
     pub(crate) smooth_lighting_params: Option<SmoothLightingParameters>,
     /// The dimensions of the 3d grid.
     pub dims: Dimensions,
-    // T: the voxel type,
-    // u32: the index of the voxel in the grid,
-    // ChangeInVoxel: whether the voxel was added or removed,
-    // [Option<T>; 6]: the neighbors of the voxel, in the same order as
-    // in the `Neighbors` data-type, if the voxel is "empty"- None.
-    pub(crate) changed_voxels: Vec<(T, BlockPos, VoxelChange, [Option<T>; 6])>,
+    /// [`B`](`BlockInGrid`): The block
+    /// [`BlockPos`]: Th position of the block in the grid
+    /// [`BlockMeshChange`]: The change that happened to the block mesh
+    /// [`SurroundingBlocks<B>`]: The blocks surrounding the block that changed
+    /// in the `Neighbors` data-type, if the voxel is "empty"- None.
+    pub(crate) changed_voxels: Vec<(B, BlockPos, BlockMeshChange, SurroundingBlocks<B>)>,
 }
 
-impl<T: BlockInGrid> MeshMD<T> {
+impl<B: BlockInGrid> CubeMD<B> {
     /// Log the changes to the voxels.
-    /// `voxel_change`: [`VoxelChange`], Added or broken.
+    /// `voxel_change`: [`BlockMeshChange`], Added or broken.
     /// `voxel_index`: the index of the voxel in the 1-dimensional grid.
     /// `voxel`: The voxel itself, same type as in the voxel registry.
     /// `neighboring_voxels`: Array where each element is the voxel in that direction.
@@ -118,16 +109,22 @@ impl<T: BlockInGrid> MeshMD<T> {
     /// Adding a voxel that already exists, or breaking one that doesn't is undefined behaviour.
     pub fn log(
         &mut self,
-        voxel_change: VoxelChange,
-        voxel_pos: BlockPos,
-        voxel: T,
-        neighboring_voxels: [Option<T>; 6],
+        block_mesh_change: BlockMeshChange,
+        block_pos: BlockPos,
+        block: B,
+        surrounding_blocks: SurroundingBlocks<B>,
     ) {
         self.changed_voxels
-            .push((voxel, voxel_pos, voxel_change, neighboring_voxels));
+            .push((block, block_pos, block_mesh_change, surrounding_blocks));
     }
     /// Get read only of the `SmoothLightingParameters`
     pub fn get_sl_params(&self) -> Option<SmoothLightingParameters> {
         self.smooth_lighting_params
+    }
+
+    pub fn quad_exists(&self, block_pos: BlockPos, quad: Face) -> bool {
+        self.vivi
+            .get_quad_index(quad, pos_to_index(block_pos, self.dims).unwrap())
+            .is_some()
     }
 }
