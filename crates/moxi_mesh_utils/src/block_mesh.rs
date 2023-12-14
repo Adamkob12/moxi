@@ -35,6 +35,15 @@ impl BlockMesh {
             BlockMesh::Air => BlockMeshRef::Air,
         }
     }
+
+    pub fn get_type(&self) -> BlockMeshType {
+        match self {
+            BlockMesh::Cube(_) => BlockMeshType::Cube,
+            BlockMesh::Custom(_) => BlockMeshType::Custom,
+            BlockMesh::XSprite(_) => BlockMeshType::XSprite,
+            BlockMesh::Air => BlockMeshType::Air,
+        }
+    }
 }
 
 /// An average intelligence pointer to a [`BlockMesh`].

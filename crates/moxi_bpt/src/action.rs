@@ -2,8 +2,6 @@ use bevy_ecs::all_tuples;
 
 use super::*;
 
-pub type BlockAction<T: IntoTrigger, S: IntoActionSet> = (T, S);
-
 pub enum Action {
     WithInput(Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
     NoInput(Box<dyn System<In = (), Out = ()>>),
