@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 bevy_ecs = "0.12"
 moxi_mesh_utils = { path = "../moxi_mesh_utils" }
+moxi_utils = { path = "../moxi_utils" }

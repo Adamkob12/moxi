@@ -3,13 +3,10 @@ pub(crate) use bevy_ecs::prelude::*;
 pub(crate) mod action;
 pub(crate) mod block;
 pub(crate) mod blockreg;
+pub(crate) mod plugin;
 pub(crate) mod trigger;
 pub(crate) mod world;
 
-pub(crate) use action::*;
-pub(crate) use block::*;
-pub(crate) use blockreg::*;
-pub(crate) use trigger::*;
 pub(crate) use world::*;
 
 pub mod prelude {

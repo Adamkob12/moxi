@@ -1,6 +1,5 @@
-use crate::*;
-
 mod description;
 mod property;
 
-use property::*;
+pub use description::*;
+pub use property::*;

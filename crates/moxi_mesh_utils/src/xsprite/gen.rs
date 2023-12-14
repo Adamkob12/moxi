@@ -15,7 +15,7 @@ pub fn generate_xsprite_mesh(
 ) -> BlockMesh {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
-    debug_assert!(
+    assert!(
         0.0 <= scale && scale <= 1.0,
         "scale parameter in generate_xsprite_mesh needs to be in 0.0 - 1.0 range"
     );

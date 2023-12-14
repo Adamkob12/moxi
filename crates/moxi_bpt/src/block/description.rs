@@ -1,13 +1,12 @@
+use super::property::*;
 use crate::{
     prelude::{ActionSet, IntoActionSet},
     trigger::{IntoTrigger, Trigger},
 };
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshType};
 
-use super::property::*;
-
 pub trait Block {
-    fn description() -> BlockDescription;
+    fn init() -> BlockDescription;
 }
 
 pub struct BlockDescription {

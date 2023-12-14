@@ -27,6 +27,14 @@ impl BlockMesh {
         BlockMesh::Custom(mesh.into())
     }
 
+    pub fn xsprite_from_texture_cords() -> Self {
+        unimplemented!()
+    }
+
+    pub fn cube_from_texture_cords() -> Self {
+        unimplemented!()
+    }
+
     pub fn as_ref<'a>(&'a self) -> BlockMeshRef<'a> {
         match self {
             BlockMesh::Cube(mesh) => BlockMeshRef::Cube(mesh),
