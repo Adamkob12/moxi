@@ -10,6 +10,7 @@ const EMPTY_AABB: Aabb = Aabb {
 /// An enum that represents the different types of meshes that can be used to represent a block.
 /// This enum will not be in any SDK, because the user will be able to define incompatible
 /// BlockMeshes, for example, a custom mesh inside a [`BlockMeshType::Cube`].
+#[derive(Reflect)]
 pub enum BlockMesh {
     /// [`BlockMeshType::Cube`]
     Cube(Mesh),
@@ -37,6 +38,7 @@ impl BlockMesh {
 }
 
 /// An average intelligence pointer to a [`BlockMesh`].
+#[derive(Reflect)]
 pub enum BlockMeshRef<'a> {
     /// [`BlockMeshType::Cube`]
     Cube(&'a Mesh),
@@ -49,7 +51,7 @@ pub enum BlockMeshRef<'a> {
 }
 
 /// An enum that represents the different types of meshes that can be used to represent a block.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BlockMeshType {
     /// A cube mesh. The most normal type of block mesh. Most blocks will use this.
     Cube,

@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy_math = "0.12"
+bevy_reflect = "0.12"
 
 [features]
 default = ["block_id_16"]

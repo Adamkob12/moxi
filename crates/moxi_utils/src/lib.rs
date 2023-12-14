@@ -12,9 +12,14 @@ pub mod prelude {
 }
 
 pub mod block {
+    use bevy_reflect::prelude::Reflect;
     /// A trait that represents a block in the grid. It doesn't have to be the block itself, just
     /// an id that represents the block and is unique, and sized, and ideally lightweight.
-    pub trait BlockInGrid: Copy + Sized + Eq + PartialEq {}
+    pub trait BlockInGrid: Copy + Sized + Eq + PartialEq {
+        fn id(&self) -> BlockId;
+        fn from_id(id: BlockId) -> Self;
+        fn into_id(self) -> BlockId;
+    }
 
     #[cfg(feature = "block_id_8")]
     pub type BlockId = u8;
@@ -30,10 +35,22 @@ pub mod block {
 
     /// A block in the grid, made up of an id and meta. The meta is optional.
     /// There can be no more than 2^(chosen id size) of blocks,
-    #[derive(Copy, Clone, Eq, PartialEq)]
+    #[derive(Reflect, Copy, Clone, Eq, PartialEq)]
     pub struct GridBlock {
         pub id: BlockId,
     }
 
-    impl BlockInGrid for GridBlock {}
+    impl BlockInGrid for GridBlock {
+        fn id(&self) -> BlockId {
+            self.id
+        }
+
+        fn from_id(id: BlockId) -> Self {
+            Self { id }
+        }
+
+        fn into_id(self) -> BlockId {
+            self.id
+        }
+    }
 }

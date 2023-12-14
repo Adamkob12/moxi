@@ -12,6 +12,7 @@ pub(crate) use bevy_render::mesh::{
 };
 pub(crate) use bevy_render::{primitives::Aabb, render_resource::VertexFormat};
 pub(crate) use bevy_utils::HashMap;
+pub(crate) use bevy_reflect::prelude::*;
 pub(crate) use moxi_utils::prelude::*;
 
 mod adj;

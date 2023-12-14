@@ -27,15 +27,20 @@ license = "MIT"
 resolver = "2"
 
 [dependencies]
-moxi_core = { path = "crates/moxi_core" }
-moxi_app = { path = "crates/moxi_app" }
+moxi_utils = { path = "../moxi_utils" }
+moxi_mesh_utils = { path = "../moxi_mesh_utils" }
+moxi_bpt = { path = "../moxi_bpt" }
+moxi_derive = { path = "../moxi_derive" }
+moxi_physics = { path = "../moxi_physics" }
+moxi_ui = { path = "../moxi_ui" }
 
 [features]
-default = ["standard_sdk"]
-minimal_sdk = []
-standard_sdk = []
-complete_sdk = []
-
+default = ["block_id_16"]
+# Bits per block id
+block_id_8 = ["moxi_utils/block_id_8"]
+block_id_16 = ["moxi_utils/block_id_16"]
+block_id_32 = ["moxi_utils/block_id_32"]
+block_id_64 = ["moxi_utils/block_id_64"]
 
 [profile.dev]
 opt-level = 3
