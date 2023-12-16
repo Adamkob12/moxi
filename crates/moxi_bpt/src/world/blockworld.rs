@@ -64,7 +64,7 @@ impl BlockWorld {
         Self::default()
     }
 
-    pub fn init_world(mut self, world: &mut World) {
+    pub fn init_blocks(mut self, world: &mut World) {
         let mut meshes = world
             .get_resource_mut::<Assets<Mesh>>()
             .expect("AssetServer not found");
