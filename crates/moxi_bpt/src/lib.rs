@@ -1,3 +1,4 @@
+#![feature(box_into_inner)]
 pub(crate) use bevy_ecs::prelude::*;
 
 pub(crate) mod action;

@@ -1,58 +1,45 @@
 use bevy_ecs::all_tuples;
-use bevy_ecs::component::{Component, StorageType};
+use bevy_ecs::bundle::{Bundle, DynamicBundle};
+use bevy_ecs::component::{Component, TableStorage};
 
-pub type PropertyType = u8;
+#[derive(Component)]
+pub struct DynamicBlock;
 
-pub const STATIC_PROPERTY_TYPE: PropertyType = 0;
-pub const DYNAMIC_PROPERTY_TYPE: PropertyType = 1;
+#[derive(Component)]
+pub struct StaticBlock;
 
-#[repr(u8)]
-pub enum BlockType {
-    Static = STATIC_PROPERTY_TYPE,
-    Dynamic = DYNAMIC_PROPERTY_TYPE,
-}
+pub trait DynamicProperty: 'static {
+    fn encode(&self) -> u8
+    where
+        Self: Sized + Into<u8> + Copy,
+    {
+        (*self).into()
+    }
 
-pub trait StaticProperty {}
-pub trait DynamicProperty {}
-
-pub trait Property<const T: PropertyType>: Component<Storage = StorageType> {
-    fn into_boxed_property(self) -> BoxedProperty<T>;
-}
-
-impl<S: StaticProperty + Component<Storage = StorageType>> Property<STATIC_PROPERTY_TYPE> for S {
-    fn into_boxed_property(self) -> BoxedProperty<STATIC_PROPERTY_TYPE> {
-        BoxedProperty::new::<S>(self)
+    fn decode(value: u8) -> Self
+    where
+        Self: Sized + From<u8> + Copy,
+    {
+        Self::from(value)
     }
 }
 
-impl<D: DynamicProperty + Component<Storage = StorageType>> Property<DYNAMIC_PROPERTY_TYPE> for D {
-    fn into_boxed_property(self) -> BoxedProperty<DYNAMIC_PROPERTY_TYPE> {
-        BoxedProperty::new::<D>(self)
+pub struct DynamicProperties(pub Vec<BoxedDynamicProperty>);
+
+impl Default for DynamicProperties {
+    fn default() -> Self {
+        Self(Vec::new())
     }
 }
 
-pub struct BoxedProperty<const F: PropertyType>(Box<dyn Property<F>>);
-
-impl<const F: PropertyType> BoxedProperty<F> {
-    pub fn new<P: Property<F>>(property: P) -> Self {
-        BoxedProperty::<F>(Box::new(property))
+impl DynamicProperties {
+    pub fn extend(&mut self, dynamic_properties: Vec<impl DynamicProperty + Sized>) {
+        self.0.extend(
+            dynamic_properties
+                .into_iter()
+                .map(|x| Box::new(x) as BoxedDynamicProperty),
+        );
     }
 }
 
-pub trait PropertyBundle<const F: PropertyType> {
-    fn get_properties(self) -> Vec<BoxedProperty<F>>;
-}
-
-macro_rules! impl_into_prop_bundle {
-    ($($T:ident),*) => {
-        #[allow(non_snake_case)]
-        impl<const F: PropertyType,$($T: Property<F>),*> PropertyBundle<F> for ($($T,)*) {
-            fn get_properties(self) -> Vec<BoxedProperty<F>> {
-                let ($($T,)*) = self;
-                vec![$($T.into_boxed_property()),*]
-            }
-        }
-    };
-}
-
-all_tuples!(impl_into_prop_bundle, 0, 15, T);
+pub type BoxedDynamicProperty = Box<dyn DynamicProperty>;

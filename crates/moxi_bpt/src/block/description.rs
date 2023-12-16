@@ -3,50 +3,45 @@ use crate::{
     prelude::{ActionSet, IntoActionSet},
     trigger::{IntoTrigger, Trigger},
 };
+use bevy_ecs::{
+    bundle::Bundle,
+    component::{Component, TableStorage},
+};
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshType};
 
-pub trait Block {
-    fn init() -> BlockDescription;
+pub trait Block<B: Bundle> {
+    fn init() -> BlockDescription<B>;
 }
 
-pub struct BlockDescription {
-    name: Option<&'static str>,
-    block_mesh: BlockMesh,
-    static_properties: Vec<BoxedProperty<STATIC_PROPERTY_TYPE>>,
-    dynamic_properties: Vec<BoxedProperty<DYNAMIC_PROPERTY_TYPE>>,
-    block_actions: Vec<(Trigger, ActionSet)>,
-    block_mesh_type: BlockMeshType,
-    block_type: BlockType,
+pub struct BlockDescription<B: Bundle> {
+    pub(crate) name: Option<&'static str>,
+    pub(crate) block_mesh: BlockMesh,
+    pub(crate) static_properties: B,
+    pub(crate) dynamic_properties: DynamicProperties,
+    pub(crate) block_actions: Vec<(Trigger, ActionSet)>,
 }
 
-impl BlockDescription {
-    pub fn new(block_mesh: BlockMesh) -> Self {
-        let block_mesh_type = block_mesh.get_type();
-        BlockDescription {
+impl<B: Bundle> BlockDescription<B> {
+    pub fn new(block_mesh: BlockMesh) -> BlockDescription<()> {
+        BlockDescription::<()> {
             name: None,
             block_mesh,
-            static_properties: Vec::new(),
-            dynamic_properties: Vec::new(),
+            static_properties: (),
+            dynamic_properties: DynamicProperties::default(),
             block_actions: Vec::new(),
-            block_mesh_type,
-            block_type: BlockType::Static,
         }
     }
 
-    pub fn add_static_properties<B: PropertyBundle<STATIC_PROPERTY_TYPE>>(
-        mut self,
-        bundle: B,
-    ) -> Self {
-        self.static_properties.extend(bundle.get_properties());
+    pub fn add_static_properties(mut self, bundle: B) -> Self {
+        self.static_properties = bundle;
         self
     }
 
-    pub fn add_dynamic_properties<B: PropertyBundle<DYNAMIC_PROPERTY_TYPE>>(
+    pub fn add_dynamic_properties<D: DynamicProperty>(
         mut self,
-        bundle: B,
+        dynamic_properties: Vec<D>,
     ) -> Self {
-        self.dynamic_properties.extend(bundle.get_properties());
-        self.block_type = BlockType::Dynamic;
+        self.dynamic_properties.extend(dynamic_properties);
         self
     }
 

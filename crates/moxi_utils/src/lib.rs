@@ -53,4 +53,18 @@ pub mod block {
             self.id
         }
     }
+
+    impl BlockInGrid for BlockId {
+        fn id(&self) -> BlockId {
+            *self
+        }
+
+        fn from_id(id: BlockId) -> Self {
+            id
+        }
+
+        fn into_id(self) -> BlockId {
+            self
+        }
+    }
 }

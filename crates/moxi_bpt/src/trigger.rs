@@ -15,6 +15,13 @@ impl Trigger {
             Trigger::NoInput(ref mut sys) => sys.run_readonly((), world),
         }
     }
+
+    pub fn get_id(&self) -> std::any::TypeId {
+        match self {
+            Trigger::WithInput(sys) => sys.type_id(),
+            Trigger::NoInput(sys) => sys.type_id(),
+        }
+    }
 }
 
 pub trait IntoTrigger {

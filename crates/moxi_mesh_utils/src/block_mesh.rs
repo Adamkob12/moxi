@@ -10,7 +10,7 @@ const EMPTY_AABB: Aabb = Aabb {
 /// An enum that represents the different types of meshes that can be used to represent a block.
 /// This enum will not be in any SDK, because the user will be able to define incompatible
 /// BlockMeshes, for example, a custom mesh inside a [`BlockMeshType::Cube`].
-#[derive(Reflect)]
+#[derive(Reflect, Clone)]
 pub enum BlockMesh {
     /// [`BlockMeshType::Cube`]
     Cube(Mesh),
@@ -50,6 +50,15 @@ impl BlockMesh {
             BlockMesh::Custom(_) => BlockMeshType::Custom,
             BlockMesh::XSprite(_) => BlockMeshType::XSprite,
             BlockMesh::Air => BlockMeshType::Air,
+        }
+    }
+
+    pub fn as_option(self) -> Option<Mesh> {
+        match self {
+            BlockMesh::Cube(mesh) => Some(mesh),
+            BlockMesh::Custom(mesh) => Some(mesh),
+            BlockMesh::XSprite(mesh) => Some(mesh),
+            BlockMesh::Air => None,
         }
     }
 }

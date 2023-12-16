@@ -17,6 +17,13 @@ impl Action {
             Action::NoInput(ref mut sys) => sys.run((), world),
         }
     }
+
+    pub fn get_id(&self) -> std::any::TypeId {
+        match self {
+            Action::WithInput(sys) => sys.type_id(),
+            Action::NoInput(sys) => sys.type_id(),
+        }
+    }
 }
 
 pub trait IntoAction {
@@ -38,6 +45,15 @@ impl IntoAction for BoxedAction<BlockWorldUpdateEvent> {
 }
 
 pub type ActionSet = Vec<Action>;
+pub trait CommonActionSet {
+    fn get_ids(&self) -> Vec<std::any::TypeId>;
+}
+
+impl CommonActionSet for ActionSet {
+    fn get_ids(&self) -> Vec<std::any::TypeId> {
+        self.iter().map(|action| action.get_id()).collect()
+    }
+}
 
 pub trait IntoActionSet {
     fn into_action_set(self) -> ActionSet;
