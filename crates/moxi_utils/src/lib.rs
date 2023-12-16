@@ -11,6 +11,7 @@ pub mod prelude {
     pub use super::face::*;
 }
 
+#[allow(clippy::all)]
 pub mod block {
     use bevy_reflect::prelude::Reflect;
     /// A trait that represents a block in the grid. It doesn't have to be the block itself, just

@@ -3,11 +3,8 @@ use crate::{
     prelude::{ActionSet, IntoActionSet},
     trigger::{IntoTrigger, Trigger},
 };
-use bevy_ecs::{
-    bundle::Bundle,
-    component::{Component, TableStorage},
-};
-use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshType};
+use bevy_ecs::bundle::Bundle;
+use moxi_mesh_utils::prelude::BlockMesh;
 
 pub trait Block<B: Bundle> {
     fn init() -> BlockDescription<B>;

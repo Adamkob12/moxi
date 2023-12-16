@@ -1,6 +1,4 @@
-use bevy_ecs::all_tuples;
-use bevy_ecs::bundle::{Bundle, DynamicBundle};
-use bevy_ecs::component::{Component, TableStorage};
+use bevy_ecs::component::Component;
 
 #[derive(Component)]
 pub struct DynamicBlock;
