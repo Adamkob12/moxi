@@ -15,6 +15,6 @@ pub mod prelude {
     pub use super::block::*;
     pub use super::blockreg::*;
     pub use super::trigger::*;
-    pub use super::world::blockworld::BlockWorld;
+    pub use super::world::blockworld::*;
     pub use super::world::*;
 }

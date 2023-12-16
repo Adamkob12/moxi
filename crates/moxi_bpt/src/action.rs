@@ -2,6 +2,7 @@ use bevy_ecs::all_tuples;
 
 use super::*;
 
+#[derive(Component)]
 pub enum Action {
     WithInput(Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
     NoInput(Box<dyn System<In = (), Out = ()>>),
@@ -47,11 +48,18 @@ impl IntoAction for BoxedAction<BlockWorldUpdateEvent> {
 pub type ActionSet = Vec<Action>;
 pub trait CommonActionSet {
     fn get_ids(&self) -> Vec<std::any::TypeId>;
+    fn enumerate_ids_and_actions(self) -> Vec<(std::any::TypeId, Action)>;
 }
 
 impl CommonActionSet for ActionSet {
     fn get_ids(&self) -> Vec<std::any::TypeId> {
         self.iter().map(|action| action.get_id()).collect()
+    }
+
+    fn enumerate_ids_and_actions(self) -> Vec<(std::any::TypeId, Action)> {
+        self.into_iter()
+            .map(|action| (action.get_id(), action))
+            .collect()
     }
 }
 
