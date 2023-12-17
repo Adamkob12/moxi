@@ -2,7 +2,7 @@ use crate::*;
 use moxi_utils::prelude::*;
 
 /// An event that is fired when a block is updated.
-#[derive(Event)]
+#[derive(Event, Clone, Copy)]
 pub struct BlockWorldUpdateEvent {
     pub block_id: BlockId,
     pub block_pos: BlockPos,
@@ -11,6 +11,7 @@ pub struct BlockWorldUpdateEvent {
 }
 
 /// Whether the update happend to the block itself or to an adjecent block.
+#[derive(Clone, Copy)]
 pub enum BlockUpdate {
     /// This block was updated.
     Pure(BlockUpdateType),
@@ -19,6 +20,7 @@ pub enum BlockUpdate {
 }
 
 /// The type of update that happened to a block.
+#[derive(Clone, Copy)]
 pub enum BlockUpdateType {
     BlockPlaced,
     BlockRemoved,

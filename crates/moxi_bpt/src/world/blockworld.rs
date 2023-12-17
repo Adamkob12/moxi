@@ -1,6 +1,7 @@
 use crate::blockreg::meshreg::MeshReg;
+use crate::prelude::Trigger;
 use crate::*;
-use action::IntoActionSet;
+use action::{Action, IntoActionSet};
 use bevy_ecs::world::unsafe_world_cell::UnsafeWorldCell;
 use moxi_utils::prelude::BlockId;
 use prelude::{Block, BlockRegistry, CommonActionSet, IntoTrigger};
@@ -29,6 +30,29 @@ pub struct BlockInitiallizer<'w> {
     world: &'w mut World,
 }
 
+impl BlockActions {
+    pub fn execute_all(&self, world: &mut World, input: Option<BlockWorldUpdateEvent>) {
+        let world = world.as_unsafe_world_cell();
+        for (trigger_entity, action_entities) in self.0.iter() {
+            unsafe {
+                let mut trigger = world
+                    .world_mut()
+                    .get_mut::<Trigger>(*trigger_entity)
+                    .unwrap();
+
+                if !trigger.evaluate_unsafe(input, world) {
+                    continue;
+                }
+
+                for action_entity in action_entities.iter() {
+                    let mut action = world.world_mut().get_mut::<Action>(*action_entity).unwrap();
+                    action.run_unsafe(input, world);
+                }
+            }
+        }
+    }
+}
+
 pub struct BlockWorldMut<'w> {
     block_world_mut: EntityWorldMut<'w>,
     unsafe_world_cell: UnsafeWorldCell<'w>,
@@ -51,13 +75,16 @@ impl<'w> BlockWorldMut<'w> {
         self
     }
 
-    pub fn add_block_actions(
+    pub fn add_block_actions<I, M, M2, M3>(
         &'w mut self,
-        into_trigger: impl IntoTrigger,
-        into_act_set: impl IntoActionSet,
+        into_trigger: impl IntoTrigger<I, M>,
+        no_input_actions: impl IntoActionSet<(), M2>,
+        input_actions: impl IntoActionSet<BlockWorldUpdateEvent, M3>,
     ) -> &mut BlockWorldMut<'w> {
         let trigger = into_trigger.into_trigger();
-        let action_set = into_act_set.into_action_set();
+        let mut action_set = no_input_actions.into_action_set();
+
+        action_set.extend(input_actions.into_action_set());
 
         let trigger_id = trigger.get_id();
 

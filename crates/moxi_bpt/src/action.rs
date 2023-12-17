@@ -1,47 +1,59 @@
-use bevy_ecs::all_tuples;
+use bevy_ecs::{all_tuples, world::unsafe_world_cell::UnsafeWorldCell};
 
-use super::*;
+use crate::*;
 
 #[derive(Component)]
 pub enum Action {
-    WithInput(Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
-    NoInput(Box<dyn System<In = (), Out = ()>>),
+    Input(Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
+    No(Box<dyn System<In = (), Out = ()>>),
+}
+
+pub trait IntoAction<In, M>: IntoSystem<In, (), M> {
+    fn into_action(self) -> Action;
 }
 
 impl Action {
-    pub fn run_action(&mut self, world: &mut World, update_event: Option<BlockWorldUpdateEvent>) {
+    pub fn run(&mut self, input: Option<BlockWorldUpdateEvent>, world: &mut World) {
         match self {
-            Action::WithInput(ref mut sys) => sys.run(
-                update_event.expect("Tried to evaluate trigger condition without proper input"),
-                world,
-            ),
-            Action::NoInput(ref mut sys) => sys.run((), world),
+            Action::Input(sys) => sys.run(input.unwrap(), world),
+            Action::No(sys) => sys.run((), world),
+        }
+    }
+
+    pub unsafe fn run_unsafe<'w>(
+        &mut self,
+        input: Option<BlockWorldUpdateEvent>,
+        world: UnsafeWorldCell<'w>,
+    ) {
+        match self {
+            Action::Input(sys) => sys.run_unsafe(input.unwrap(), world),
+            Action::No(sys) => sys.run_unsafe((), world),
         }
     }
 
     pub fn get_id(&self) -> std::any::TypeId {
         match self {
-            Action::WithInput(sys) => sys.type_id(),
-            Action::NoInput(sys) => sys.type_id(),
+            Action::Input(sys) => sys.type_id(),
+            Action::No(sys) => sys.type_id(),
         }
     }
 }
 
-pub trait IntoAction {
-    fn into_action(self) -> Action;
-}
-
-type BoxedAction<In> = Box<dyn System<In = In, Out = ()>>;
-
-impl IntoAction for BoxedAction<()> {
+impl<S, M> IntoAction<(), M> for S
+where
+    S: IntoSystem<(), (), M>,
+{
     fn into_action(self) -> Action {
-        Action::NoInput(self)
+        return Action::No(Box::new(S::into_system(self)));
     }
 }
 
-impl IntoAction for BoxedAction<BlockWorldUpdateEvent> {
+impl<S, M> IntoAction<BlockWorldUpdateEvent, M> for S
+where
+    S: IntoSystem<BlockWorldUpdateEvent, (), M>,
+{
     fn into_action(self) -> Action {
-        Action::WithInput(self)
+        return Action::Input(Box::new(S::into_system(self)));
     }
 }
 
@@ -63,28 +75,57 @@ impl CommonActionSet for ActionSet {
     }
 }
 
-pub trait IntoActionSet {
-    fn into_action_set(self) -> ActionSet;
+pub struct TupleMarker<T> {
+    _phantom: std::marker::PhantomData<T>,
+}
+pub struct SingleAndReadyToMingle<T> {
+    _phantom: std::marker::PhantomData<T>,
 }
 
-impl<T1: IntoAction> IntoActionSet for T1 {
-    fn into_action_set(self) -> ActionSet {
-        let mut actions = Vec::new();
-        actions.push(self.into_action());
-        actions
-    }
+pub struct EmptyActionSet;
+
+pub trait IntoActionSet<I: ValidActionInput, M> {
+    fn into_action_set(self) -> ActionSet;
 }
 
 macro_rules! impl_into_action_set {
     ($($T:ident),*) => {
         #[allow(non_snake_case)]
-        impl<$($T: IntoAction),*> IntoActionSet for ($($T,)*) {
+        impl<M, I: ValidActionInput, $($T: IntoActionSet<I, M>),*> IntoActionSet<I, TupleMarker<M>> for ($($T,)*) {
             fn into_action_set(self) -> ActionSet {
                 let ($($T,)*) = self;
-                vec![$($T.into_action()),*]
+                let mut actions = vec![];
+                $(actions.extend($T.into_action_set()));*;
+                actions
             }
         }
     };
 }
 
-all_tuples!(impl_into_action_set, 0, 15, T);
+all_tuples!(impl_into_action_set, 1, 15, T);
+
+impl IntoActionSet<(), EmptyActionSet> for () {
+    fn into_action_set(self) -> ActionSet {
+        vec![]
+    }
+}
+
+impl IntoActionSet<BlockWorldUpdateEvent, EmptyActionSet> for () {
+    fn into_action_set(self) -> ActionSet {
+        vec![]
+    }
+}
+
+impl<M, I: ValidActionInput, T> IntoActionSet<I, SingleAndReadyToMingle<M>> for T
+where
+    T: IntoAction<I, M>,
+{
+    fn into_action_set(self) -> ActionSet {
+        vec![self.into_action()]
+    }
+}
+
+pub trait ValidActionInput {}
+
+impl ValidActionInput for () {}
+impl ValidActionInput for BlockWorldUpdateEvent {}

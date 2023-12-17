@@ -2,6 +2,7 @@ pub(crate) use bevy_ecs::prelude::*;
 
 pub(crate) mod action;
 pub(crate) mod block;
+pub(crate) mod block_action;
 pub(crate) mod blockreg;
 pub(crate) mod chunk;
 pub(crate) mod plugin;
