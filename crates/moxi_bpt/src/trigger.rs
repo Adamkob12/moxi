@@ -4,8 +4,11 @@ use crate::*;
 
 #[derive(Component)]
 pub enum Trigger {
-    Input(Box<dyn System<In = BlockWorldUpdateEvent, Out = bool>>),
-    No(Box<dyn System<In = (), Out = bool>>),
+    Input(
+        bool,
+        Box<dyn System<In = BlockWorldUpdateEvent, Out = bool>>,
+    ),
+    No(bool, Box<dyn System<In = (), Out = bool>>),
 }
 
 pub trait IntoTrigger<In, M>: IntoSystem<In, bool, M> {
@@ -15,8 +18,23 @@ pub trait IntoTrigger<In, M>: IntoSystem<In, bool, M> {
 impl Trigger {
     pub fn evaluate(&mut self, input: Option<BlockWorldUpdateEvent>, world: &mut World) -> bool {
         match self {
-            Trigger::Input(sys) => sys.run(input.unwrap(), world),
-            Trigger::No(sys) => sys.run((), world),
+            Trigger::Input(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    sys.initialize(world);
+                }
+                sys.run(
+                    input.expect("Expected valid input to evaluate Trigger"),
+                    world,
+                )
+            }
+            Trigger::No(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    sys.initialize(world);
+                }
+                sys.run((), world)
+            }
         }
     }
 
@@ -26,14 +44,34 @@ impl Trigger {
         world: UnsafeWorldCell<'w>,
     ) -> bool {
         match self {
-            Trigger::Input(sys) => sys.run_unsafe(input.unwrap(), world),
-            Trigger::No(sys) => sys.run_unsafe((), world),
+            Trigger::Input(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    unsafe {
+                        sys.initialize(world.world_mut());
+                    }
+                }
+                sys.run_unsafe(
+                    input.expect("Expected valid input to evaluate Trigger"),
+                    world,
+                )
+            }
+            Trigger::No(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    unsafe {
+                        sys.initialize(world.world_mut());
+                    }
+                }
+                sys.run_unsafe((), world)
+            }
         }
     }
+
     pub fn get_id(&self) -> std::any::TypeId {
         match self {
-            Trigger::Input(sys) => sys.type_id(),
-            Trigger::No(sys) => sys.type_id(),
+            Trigger::Input(_, sys) => sys.type_id(),
+            Trigger::No(_, sys) => sys.type_id(),
         }
     }
 }
@@ -43,7 +81,7 @@ where
     S: IntoSystem<(), bool, M>,
 {
     fn into_trigger(self) -> Trigger {
-        return Trigger::No(Box::new(S::into_system(self)));
+        return Trigger::No(false, Box::new(S::into_system(self)));
     }
 }
 
@@ -52,6 +90,6 @@ where
     S: IntoSystem<BlockWorldUpdateEvent, bool, M>,
 {
     fn into_trigger(self) -> Trigger {
-        return Trigger::Input(Box::new(S::into_system(self)));
+        return Trigger::Input(false, Box::new(S::into_system(self)));
     }
 }

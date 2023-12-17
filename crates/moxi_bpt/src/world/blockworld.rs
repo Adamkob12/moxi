@@ -18,7 +18,7 @@ pub(crate) struct BlockActions(pub Vec<(Entity, Vec<Entity>)>);
 pub(crate) struct BlockMarker(pub BlockId);
 
 #[derive(Resource, Default)]
-pub(crate) struct BlockIdtoEnt(HashMap<BlockId, Entity>);
+pub(crate) struct BlockIdtoEnt(pub HashMap<BlockId, Entity>);
 
 #[derive(Resource, Default)]
 pub(crate) struct TriggersMap(HashMap<TriggerId, Entity>);
@@ -33,6 +33,26 @@ pub struct BlockInitiallizer<'w> {
 impl BlockActions {
     pub fn execute_all(&self, world: &mut World, input: Option<BlockWorldUpdateEvent>) {
         let world = world.as_unsafe_world_cell();
+        for (trigger_entity, action_entities) in self.0.iter() {
+            unsafe {
+                let mut trigger = world
+                    .world_mut()
+                    .get_mut::<Trigger>(*trigger_entity)
+                    .unwrap();
+
+                if !trigger.evaluate_unsafe(input, world) {
+                    continue;
+                }
+
+                for action_entity in action_entities.iter() {
+                    let mut action = world.world_mut().get_mut::<Action>(*action_entity).unwrap();
+                    action.run_unsafe(input, world);
+                }
+            }
+        }
+    }
+
+    pub fn execute_all_unsafe(&self, world: UnsafeWorldCell, input: Option<BlockWorldUpdateEvent>) {
         for (trigger_entity, action_entities) in self.0.iter() {
             unsafe {
                 let mut trigger = world
@@ -75,9 +95,9 @@ impl<'w> BlockWorldMut<'w> {
         self
     }
 
-    pub fn add_block_actions<I, M, M2, M3>(
+    pub fn add_block_actions<I, M1, M2, M3>(
         &'w mut self,
-        into_trigger: impl IntoTrigger<I, M>,
+        into_trigger: impl IntoTrigger<I, M1>,
         no_input_actions: impl IntoActionSet<(), M2>,
         input_actions: impl IntoActionSet<BlockWorldUpdateEvent, M3>,
     ) -> &mut BlockWorldMut<'w> {

@@ -4,8 +4,8 @@ use crate::*;
 
 #[derive(Component)]
 pub enum Action {
-    Input(Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
-    No(Box<dyn System<In = (), Out = ()>>),
+    Input(bool, Box<dyn System<In = BlockWorldUpdateEvent, Out = ()>>),
+    No(bool, Box<dyn System<In = (), Out = ()>>),
 }
 
 pub trait IntoAction<In, M>: IntoSystem<In, (), M> {
@@ -15,8 +15,23 @@ pub trait IntoAction<In, M>: IntoSystem<In, (), M> {
 impl Action {
     pub fn run(&mut self, input: Option<BlockWorldUpdateEvent>, world: &mut World) {
         match self {
-            Action::Input(sys) => sys.run(input.unwrap(), world),
-            Action::No(sys) => sys.run((), world),
+            Action::Input(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    sys.initialize(world);
+                }
+                sys.run(
+                    input.expect("Expected valid input to evaluate Trigger"),
+                    world,
+                )
+            }
+            Action::No(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    sys.initialize(world);
+                }
+                sys.run((), world)
+            }
         }
     }
 
@@ -26,15 +41,34 @@ impl Action {
         world: UnsafeWorldCell<'w>,
     ) {
         match self {
-            Action::Input(sys) => sys.run_unsafe(input.unwrap(), world),
-            Action::No(sys) => sys.run_unsafe((), world),
+            Action::Input(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    unsafe {
+                        sys.initialize(world.world_mut());
+                    }
+                }
+                sys.run_unsafe(
+                    input.expect("Expected valid input to evaluate Trigger"),
+                    world,
+                )
+            }
+            Action::No(initialized, sys) => {
+                if !*initialized {
+                    *initialized = true;
+                    unsafe {
+                        sys.initialize(world.world_mut());
+                    }
+                }
+                sys.run_unsafe((), world)
+            }
         }
     }
 
     pub fn get_id(&self) -> std::any::TypeId {
         match self {
-            Action::Input(sys) => sys.type_id(),
-            Action::No(sys) => sys.type_id(),
+            Action::Input(_, sys) => sys.type_id(),
+            Action::No(_, sys) => sys.type_id(),
         }
     }
 }
@@ -44,7 +78,7 @@ where
     S: IntoSystem<(), (), M>,
 {
     fn into_action(self) -> Action {
-        return Action::No(Box::new(S::into_system(self)));
+        return Action::No(false, Box::new(S::into_system(self)));
     }
 }
 
@@ -53,7 +87,7 @@ where
     S: IntoSystem<BlockWorldUpdateEvent, (), M>,
 {
     fn into_action(self) -> Action {
-        return Action::Input(Box::new(S::into_system(self)));
+        return Action::Input(false, Box::new(S::into_system(self)));
     }
 }
 
