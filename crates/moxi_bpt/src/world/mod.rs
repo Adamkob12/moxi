@@ -7,51 +7,84 @@ pub use update_event::*;
 #[cfg(test)]
 mod tests {
     use super::blockworld::*;
-    use crate::prelude::*;
+    use crate::{blockreg::meshreg::MeshReg, prelude::*};
     use bevy_ecs::prelude::*;
-    use moxi_mesh_utils::prelude::*;
+    use defs::*;
+    use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
 
-    struct Block1;
+    // different module so I can fold it neetly in the editor
+    mod defs {
+        use crate::prelude::*;
+        use bevy_ecs::prelude::*;
+        use moxi_mesh_utils::prelude::*;
+        use moxi_utils::prelude::Face;
+        pub struct Block1;
+        pub struct Block2;
 
-    impl Block for Block1 {
-        fn get_name() -> &'static str {
-            "Block1"
+        impl Block for Block1 {
+            fn get_name() -> &'static str {
+                "Block1"
+            }
+
+            fn get_mesh() -> BlockMesh {
+                BlockMesh::Air
+            }
         }
 
-        fn get_mesh() -> BlockMesh {
-            BlockMesh::Air
+        impl Block for Block2 {
+            fn get_name() -> &'static str {
+                "Block2"
+            }
+
+            fn get_mesh() -> BlockMesh {
+                generate_cube_mesh(
+                    [1.0; 3],
+                    [10, 10],
+                    [
+                        (Face::Top, [0, 0]),
+                        (Face::Bottom, [0, 0]),
+                        (Face::Left, [0, 0]),
+                        (Face::Right, [0, 0]),
+                        (Face::Front, [0, 0]),
+                        (Face::Back, [0, 0]),
+                    ],
+                    [0.0; 3],
+                    0.0,
+                    Some(1.0),
+                    1.0,
+                )
+            }
+        }
+
+        #[derive(Resource)]
+        pub struct Counter(pub usize);
+
+        pub fn increment_counter(mut counter: ResMut<Counter>) {
+            counter.0 += 1;
+        }
+
+        pub fn trigger_always_true() -> bool {
+            true
+        }
+
+        pub fn action_print_hello_world_w_input(_: In<BlockWorldUpdateEvent>, _world: &mut World) {
+            println!("Hello world!");
+        }
+
+        pub fn action_print_hello_world(_world: &mut World) {
+            println!("Hello world!");
         }
     }
 
-    #[derive(Resource)]
-    struct Counter(usize);
-
-    fn increment_counter(mut counter: ResMut<Counter>) {
-        counter.0 += 1;
-    }
-
-    fn trigger_always_true() -> bool {
-        true
-    }
-
-    fn action_print_hello_world_w_input(_: In<BlockWorldUpdateEvent>, _world: &mut World) {
-        println!("Hello world!");
-    }
-
-    fn action_print_hello_world(_world: &mut World) {
-        println!("Hello world!");
-    }
-
+    /// Test simply adding a block
     #[test]
     fn test_blockworld1() {
         let mut world = World::default();
 
-        let mut initer = BlockInitiallizer::new(&mut world);
-
-        initer
+        world
             .init_block::<Block1>()
-            .add_static_properties(())
-            .add_block_actions(trigger_always_true, (), ());
+            .with_static_properties(())
+            .with_block_actions(trigger_always_true, (), ());
 
         world
             .query::<&BlockMarker>()
@@ -60,16 +93,15 @@ mod tests {
             });
     }
 
+    /// Test adding multiple block actions with input and without
     #[test]
     fn test_blockworld2() {
         let mut world = World::default();
 
-        let mut initer = BlockInitiallizer::new(&mut world);
-
-        initer
+        world
             .init_block::<Block1>()
-            .add_static_properties(())
-            .add_block_actions(
+            .with_static_properties(())
+            .with_block_actions(
                 trigger_always_true,
                 (action_print_hello_world, action_print_hello_world),
                 action_print_hello_world_w_input,
@@ -82,17 +114,32 @@ mod tests {
             });
     }
 
+    /// Test adding multiple blocks and small test of the mesh registry
+    #[test]
+    fn test_blockworld3() {
+        let mut world = World::default();
+
+        world
+            .init_block::<Block1>()
+            .with_static_properties(())
+            .init_block::<Block2>()
+            .with_static_properties(());
+
+        let mesh_ty = world.resource::<MeshReg>().get_block_mesh_type(&1);
+        assert_eq!(mesh_ty, BlockMeshType::Cube);
+    }
+
+    /// Test the execution of block actions
     #[test]
     fn test_block_actions1() {
         let mut world = World::default();
 
         world.insert_resource(Counter(0));
-        let mut initer = BlockInitiallizer::new(&mut world);
 
-        initer
+        world
             .init_block::<Block1>()
-            .add_static_properties(())
-            .add_block_actions(
+            .with_static_properties(())
+            .with_block_actions(
                 trigger_always_true,
                 (increment_counter, increment_counter, increment_counter),
                 (),

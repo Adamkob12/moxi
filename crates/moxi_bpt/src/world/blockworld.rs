@@ -17,6 +17,9 @@ pub(crate) struct BlockActions(pub Vec<(Entity, Vec<Entity>)>);
 #[derive(Component)]
 pub(crate) struct BlockMarker(pub BlockId);
 
+#[derive(Component)]
+pub(crate) struct BlockName(pub &'static str);
+
 #[derive(Resource, Default)]
 pub(crate) struct BlockIdtoEnt(pub HashMap<BlockId, Entity>);
 
@@ -26,8 +29,8 @@ pub(crate) struct TriggersMap(HashMap<TriggerId, Entity>);
 #[derive(Resource, Default)]
 pub(crate) struct ActionsMap(HashMap<ActionId, Entity>);
 
-pub struct BlockInitiallizer<'w> {
-    world: &'w mut World,
+pub trait BlockInitiallizerTrait {
+    fn init_block<'w, B: Block>(&'w mut self) -> BlockWorldMut<'w>;
 }
 
 impl BlockActions {
@@ -83,11 +86,15 @@ impl<'w> BlockWorldMut<'w> {
         self.block_world_mut.world_mut()
     }
 
+    pub fn init_block<B: Block>(&'w mut self) -> BlockWorldMut<'w> {
+        unsafe { self.world_mut().init_block::<B>() }
+    }
+
     pub fn id(&self) -> Entity {
         self.block_world_mut.id()
     }
 
-    pub fn add_static_properties<B: Bundle>(
+    pub fn with_static_properties<B: Bundle>(
         &'w mut self,
         static_properties: B,
     ) -> &mut BlockWorldMut<'w> {
@@ -95,7 +102,7 @@ impl<'w> BlockWorldMut<'w> {
         self
     }
 
-    pub fn add_block_actions<I, M1, M2, M3>(
+    pub fn with_block_actions<I, M1, M2, M3>(
         &'w mut self,
         into_trigger: impl IntoTrigger<I, M1>,
         no_input_actions: impl IntoActionSet<(), M2>,
@@ -148,37 +155,29 @@ impl<'w> BlockWorldMut<'w> {
     }
 }
 
-impl<'w> BlockInitiallizer<'w> {
-    pub fn new(world: &'w mut World) -> Self {
-        Self { world }
-    }
-    pub fn init_block<B: Block>(&'w mut self) -> BlockWorldMut<'w> {
+impl BlockInitiallizerTrait for World {
+    fn init_block<'w, B: Block>(&'w mut self) -> BlockWorldMut<'w> {
         let block_name = B::get_name();
         let block_id = self
-            .world
             .get_resource::<BlockRegistry>()
             .map_or(0, |reg| reg.0.len()) as BlockId;
         if block_id == 0 {
-            self.world.init_resource::<BlockRegistry>();
-            self.world.init_resource::<MeshReg>();
-            self.world.init_resource::<BlockIdtoEnt>();
-            self.world.init_resource::<ActionsMap>();
-            self.world.init_resource::<TriggersMap>();
+            self.init_resource::<BlockRegistry>();
+            self.init_resource::<MeshReg>();
+            self.init_resource::<BlockIdtoEnt>();
+            self.init_resource::<ActionsMap>();
+            self.init_resource::<TriggersMap>();
         }
 
-        self.world
-            .resource_mut::<BlockRegistry>()
+        self.resource_mut::<BlockRegistry>()
             .0
             .insert(block_name, block_id);
-        self.world
-            .resource_mut::<MeshReg>()
-            .meshes
-            .push(B::get_mesh());
+        self.resource_mut::<MeshReg>().meshes.push(B::get_mesh());
 
         unsafe {
-            let tmp_mut_ptr = self.world as *mut World;
+            let tmp_mut_ptr = self as *mut World;
             let block_world_mut = BlockWorldMut {
-                block_world_mut: self.world.spawn(BlockMarker(block_id)),
+                block_world_mut: self.spawn(BlockMarker(block_id)),
                 unsafe_world_cell: tmp_mut_ptr.as_mut().unwrap().as_unsafe_world_cell(),
             };
             let block_entity = block_world_mut.id();

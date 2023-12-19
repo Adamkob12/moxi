@@ -1,9 +1,3 @@
-use super::property::*;
-use crate::{
-    prelude::{ActionSet, IntoActionSet},
-    trigger::{IntoTrigger, Trigger},
-};
-use bevy_ecs::bundle::Bundle;
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshType};
 
 pub trait Block {
