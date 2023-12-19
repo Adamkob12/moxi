@@ -19,7 +19,7 @@ type BlockIndex = usize;
 #[derive(Copy, Clone)]
 pub struct BlockGlobalPos {
     pub pos: BlockPos,
-    pub chunk_cords: ChunkCords,
+    pub cords: ChunkCords,
     pub valid: bool,
 }
 /// The translation of the block in the world
@@ -29,7 +29,7 @@ impl BlockGlobalPos {
     pub fn new(block_pos: BlockPos, chunk_cords: ChunkCords) -> Self {
         Self {
             pos: block_pos,
-            chunk_cords,
+            cords: chunk_cords,
             valid: true,
         }
     }
@@ -291,7 +291,7 @@ pub fn point_to_global_block_pos(point: Vec3, chunk_dims: Dimensions) -> BlockGl
     let flag = y >= 0.0 && y <= chunk_height as f32;
     BlockGlobalPos {
         pos: block_pos.into(),
-        chunk_cords,
+        cords: chunk_cords,
         valid: flag,
     }
 }
@@ -302,8 +302,8 @@ pub fn global_block_pos_to_block_trans(
     dims: Dimensions,
 ) -> BlockTrans {
     let [u, v] = [
-        global_pos.chunk_cords.x as f32 * dims.x as f32,
-        global_pos.chunk_cords.y as f32 * dims.z as f32,
+        global_pos.cords.x as f32 * dims.x as f32,
+        global_pos.cords.y as f32 * dims.z as f32,
     ];
 
     block_dims
@@ -331,13 +331,13 @@ pub fn global_neighbor(
     if let Some(neighbor_pos) = neighbor_pos(global_pos.pos, face, dims) {
         return BlockGlobalPos {
             pos: neighbor_pos,
-            chunk_cords: global_pos.chunk_cords,
+            cords: global_pos.cords,
             valid: 0 >= neighbor_pos.y && dims.y > neighbor_pos.y,
         };
     } else if let Some(neighbor_pos) = neighbor_across_chunk(global_pos.pos, face, dims) {
         return BlockGlobalPos {
             pos: neighbor_pos,
-            chunk_cords: adj_chunk(global_pos.chunk_cords, face),
+            cords: adj_chunk(global_pos.cords, face),
             valid: 0 >= neighbor_pos.y && dims.y > neighbor_pos.y,
         };
     }

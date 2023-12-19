@@ -1,4 +1,5 @@
 pub(crate) mod block_commands;
+pub(crate) mod blocks_param;
 pub(crate) mod blockworld;
 pub(crate) mod update_event;
 
@@ -147,7 +148,7 @@ mod tests {
 
         let block_entity = {
             let block_reg = world.resource::<BlockRegistry>();
-            let block_id = block_reg.0.get("Block1").unwrap();
+            let block_id = block_reg.name_to_id.get("Block1").unwrap();
             let block_id_to_ent = world.resource::<BlockIdtoEnt>();
             let block_entity = block_id_to_ent.0.get(block_id).unwrap();
             *block_entity

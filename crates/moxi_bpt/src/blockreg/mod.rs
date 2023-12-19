@@ -4,10 +4,19 @@ use moxi_utils::prelude::BlockId;
 use std::collections::HashMap;
 
 #[derive(Resource, Default)]
-pub struct BlockRegistry(pub(crate) HashMap<&'static str, BlockId>);
+pub struct BlockRegistry {
+    pub(crate) name_to_id: HashMap<&'static str, BlockId>,
+    pub(crate) id_to_name: HashMap<BlockId, &'static str>,
+}
 
 impl BlockRegistry {
-    pub fn new(map: HashMap<&'static str, BlockId>) -> Self {
-        Self(map)
+    pub fn new(
+        name_to_id: HashMap<&'static str, BlockId>,
+        id_to_name: HashMap<BlockId, &'static str>,
+    ) -> Self {
+        Self {
+            name_to_id,
+            id_to_name,
+        }
     }
 }

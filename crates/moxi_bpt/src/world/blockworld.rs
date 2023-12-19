@@ -160,7 +160,7 @@ impl BlockInitiallizerTrait for World {
         let block_name = B::get_name();
         let block_id = self
             .get_resource::<BlockRegistry>()
-            .map_or(0, |reg| reg.0.len()) as BlockId;
+            .map_or(0, |reg| reg.name_to_id.len()) as BlockId;
         if block_id == 0 {
             self.init_resource::<BlockRegistry>();
             self.init_resource::<MeshReg>();
@@ -170,14 +170,17 @@ impl BlockInitiallizerTrait for World {
         }
 
         self.resource_mut::<BlockRegistry>()
-            .0
+            .name_to_id
             .insert(block_name, block_id);
+        self.resource_mut::<BlockRegistry>()
+            .id_to_name
+            .insert(block_id, block_name);
         self.resource_mut::<MeshReg>().meshes.push(B::get_mesh());
 
         unsafe {
             let tmp_mut_ptr = self as *mut World;
             let block_world_mut = BlockWorldMut {
-                block_world_mut: self.spawn(BlockMarker(block_id)),
+                block_world_mut: self.spawn((BlockMarker(block_id), BlockName(block_name))),
                 unsafe_world_cell: tmp_mut_ptr.as_mut().unwrap().as_unsafe_world_cell(),
             };
             let block_entity = block_world_mut.id();

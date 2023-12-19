@@ -1,8 +1,8 @@
-mod chunkbuilder;
-mod components;
-mod meshmd;
-mod resources;
-mod systems;
+pub(crate) mod chunkbuilder;
+pub(crate) mod components;
+pub(crate) mod meshmd;
+pub(crate) mod resources;
+pub(crate) mod systems;
 
 use bevy_app::prelude::Plugin;
 use bevy_asset::Handle;
