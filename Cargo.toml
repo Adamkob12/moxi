@@ -26,6 +26,9 @@ keywords = [
 license = "MIT"
 resolver = "2"
 
+[workspace]
+members = ["crates/*"]
+
 [dependencies]
 moxi_utils = { path = "crates/moxi_utils" }
 moxi_mesh_utils = { path = "crates/moxi_mesh_utils" }

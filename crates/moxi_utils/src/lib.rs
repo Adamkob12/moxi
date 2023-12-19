@@ -11,7 +11,6 @@ pub mod prelude {
     pub use super::face::*;
 }
 
-#[allow(clippy::all)]
 pub mod block {
     use bevy_reflect::prelude::Reflect;
     /// A trait that represents a block in the grid. It doesn't have to be the block itself, just
@@ -22,15 +21,19 @@ pub mod block {
         fn into_id(self) -> BlockId;
     }
 
+    #[allow(clippy::all)]
     #[cfg(feature = "block_id_8")]
     pub type BlockId = u8;
 
+    #[allow(clippy::all)]
     #[cfg(feature = "block_id_16")]
     pub type BlockId = u16;
 
+    #[allow(clippy::all)]
     #[cfg(feature = "block_id_32")]
     pub type BlockId = u32;
 
+    #[allow(clippy::all)]
     #[cfg(feature = "block_id_64")]
     pub type BlockId = u64;
 
