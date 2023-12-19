@@ -5,7 +5,7 @@ use super::md::XSpriteMD;
 /// Meshify all of the [`xsprite`](`BlockMeshType::XSprite`) blocks in a chunk grid.
 pub fn meshify_xsprite_voxels<B: BlockInGrid, const N: usize>(
     reg: &impl MeshRegistry<B>,
-    grid: &ChunkGrid<B, N>,
+    grid: &Grid<B, N>,
 ) -> (Mesh, XSpriteMD<B>) {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
@@ -96,6 +96,7 @@ pub fn meshify_xsprite_voxels<B: BlockInGrid, const N: usize>(
         XSpriteMD {
             vivi: data_structure.to_vec(),
             log: vec![],
+            dims: grid.dims,
         },
     )
 }

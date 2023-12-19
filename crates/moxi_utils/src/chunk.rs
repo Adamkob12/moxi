@@ -7,7 +7,7 @@ pub type Dimensions = UVec3;
 /// Chunk coordinates, (x, z)
 pub type ChunkCords = IVec2;
 /// Chunk grid
-pub struct ChunkGrid<T: BlockInGrid, const N: usize> {
+pub struct Grid<T: BlockInGrid, const N: usize> {
     pub dims: Dimensions,
     grid: [T; N],
 }
@@ -56,7 +56,7 @@ impl<B> std::ops::Index<Face> for SurroundingBlocks<B> {
     }
 }
 
-impl<T: BlockInGrid, const N: usize> ChunkGrid<T, N> {
+impl<T: BlockInGrid, const N: usize> Grid<T, N> {
     pub fn get_block(&self, block_pos: BlockPos) -> Option<T> {
         pos_to_index(block_pos, self.dims).map(|i| self.grid[i])
     }
@@ -353,4 +353,8 @@ pub fn adj_chunk(chunk_cords: ChunkCords, face: Face) -> ChunkCords {
         Face::Right => chunk_cords + IVec2::from([1, 0]),
         Face::Left => chunk_cords - IVec2::from([1, 0]),
     }
+}
+
+pub fn chunk_distance(chunk1: ChunkCords, chunk2: ChunkCords) -> i32 {
+    (chunk1.x - chunk2.x).abs().max((chunk1.y - chunk2.y).abs())
 }

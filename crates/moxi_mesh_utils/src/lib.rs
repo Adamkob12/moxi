@@ -7,12 +7,12 @@
 
 pub(crate) use bevy_asset::AssetId;
 pub(crate) use bevy_math::{UVec3, Vec3};
+pub(crate) use bevy_reflect::prelude::*;
 pub(crate) use bevy_render::mesh::{
     Indices, Mesh, MeshVertexAttribute, PrimitiveTopology, VertexAttributeValues,
 };
 pub(crate) use bevy_render::{primitives::Aabb, render_resource::VertexFormat};
 pub(crate) use bevy_utils::HashMap;
-pub(crate) use bevy_reflect::prelude::*;
 pub(crate) use moxi_utils::prelude::*;
 
 mod adj;
@@ -29,8 +29,6 @@ pub(crate) use cube::*;
 pub(crate) use mesh_reg::*;
 pub(crate) use sl::*;
 pub(crate) use vav_utils::*;
-
-pub const CHUNK_DIMS: Dimensions = Dimensions::new(16, 64, 16);
 
 /// This enum represents all the way a voxel could be changed.
 #[derive(Clone, Copy)]

@@ -2,7 +2,7 @@ pub use bevy_math::Vec3A;
 
 use crate::*;
 
-const EMPTY_AABB: Aabb = Aabb {
+pub const EMPTY_AABB: Aabb = Aabb {
     center: Vec3A::ZERO,
     half_extents: Vec3A::ZERO,
 };

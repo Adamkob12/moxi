@@ -9,6 +9,25 @@ pub struct ChunkMap(HashMap<ChunkCords, Entity>);
 #[derive(Resource)]
 pub struct ChunkQueue(Vec<ChunkCords>);
 
+#[derive(Resource)]
+pub struct CurrentChunk(ChunkCords);
+
+impl Default for CurrentChunk {
+    fn default() -> Self {
+        Self([0, 0].into())
+    }
+}
+
+impl CurrentChunk {
+    pub fn get(&self) -> ChunkCords {
+        self.0
+    }
+
+    pub fn set(&mut self, cords: ChunkCords) {
+        self.0 = cords;
+    }
+}
+
 impl Default for ChunkMap {
     fn default() -> Self {
         Self(HashMap::with_capacity(100))
@@ -22,8 +41,30 @@ impl ChunkMap {
             .copied()
             .map_or(None, |e| (e != Entity::PLACEHOLDER).then_some(e))
     }
+
+    pub fn contains_chunk(&self, cords: ChunkCords) -> bool {
+        self.0.contains_key(&cords)
+    }
+
     pub fn insert_chunk(&mut self, cords: ChunkCords, entity: Entity) {
         self.0.insert(cords, entity);
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = (ChunkCords, Entity)> + '_ {
+        self.0.iter().map(|(cords, entity)| (*cords, *entity))
+    }
+
+    pub fn extract_if(&mut self, mut predicate: impl FnMut(&ChunkCords) -> bool) -> Vec<Entity> {
+        let mut entities = Vec::new();
+        self.0.retain(|cords, entity| {
+            if predicate(cords) {
+                entities.push(*entity);
+                false
+            } else {
+                true
+            }
+        });
+        entities
     }
 }
 

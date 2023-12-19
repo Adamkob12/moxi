@@ -28,8 +28,9 @@ pub(crate) fn apply_sl_quad(
     surrounding_blocks: [bool; 3 * 3 * 3],
     slparams: SmoothLightingParameters,
     voxel_dims: [f32; 3],
+    dims: Dimensions,
 ) {
-    let block_index = pos_to_index(block_pos, CHUNK_DIMS).unwrap();
+    let block_index = pos_to_index(block_pos, dims).unwrap();
     let quad = vivi
         .get_quad_index(face, block_index)
         .expect("Couldn't find quad in vivi for smooth lighting");
@@ -109,7 +110,7 @@ pub fn apply_smooth_lighting<T: BlockInGrid, const N: usize>(
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,
-    this_chunk: &ChunkGrid<T, N>,
+    this_chunk: &Grid<T, N>,
 ) {
     apply_smooth_lighting_with_connected_chunks(
         reg,
@@ -137,15 +138,15 @@ pub fn apply_smooth_lighting_with_connected_chunks<'a, T: BlockInGrid, const N: 
     dims: Dimensions,
     lower_bound: usize,
     upper_bound: usize,
-    this_chunk: &'a ChunkGrid<T, N>,
-    north_chunk: Option<&'a ChunkGrid<T, N>>,
-    south_chunk: Option<&'a ChunkGrid<T, N>>,
-    east_chunk: Option<&'a ChunkGrid<T, N>>,
-    west_chunk: Option<&'a ChunkGrid<T, N>>,
-    no_east_chunk: Option<&'a ChunkGrid<T, N>>,
-    no_west_chunk: Option<&'a ChunkGrid<T, N>>,
-    so_east_chunk: Option<&'a ChunkGrid<T, N>>,
-    so_west_chunk: Option<&'a ChunkGrid<T, N>>,
+    this_chunk: &'a Grid<T, N>,
+    north_chunk: Option<&'a Grid<T, N>>,
+    south_chunk: Option<&'a Grid<T, N>>,
+    east_chunk: Option<&'a Grid<T, N>>,
+    west_chunk: Option<&'a Grid<T, N>>,
+    no_east_chunk: Option<&'a Grid<T, N>>,
+    no_west_chunk: Option<&'a Grid<T, N>>,
+    so_east_chunk: Option<&'a Grid<T, N>>,
+    so_west_chunk: Option<&'a Grid<T, N>>,
 ) {
     if let Some(sl) = metadata.smooth_lighting_params {
         for (block_index, quads) in metadata.vivi.vivi.iter().enumerate().skip(lower_bound) {
@@ -277,6 +278,7 @@ pub fn apply_smooth_lighting_with_connected_chunks<'a, T: BlockInGrid, const N: 
                     surrounding_blocks,
                     sl,
                     reg.get_block_dims(),
+                    this_chunk.dims,
                 )
             }
         }

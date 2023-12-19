@@ -5,7 +5,7 @@ use crate::*;
 /// Meshify all of the [`custom`](`BlockMeshType::Custom`) blocks in a chunk grid.
 pub fn meshify_custom_voxels<B: BlockInGrid, const N: usize>(
     reg: &impl MeshRegistry<B>,
-    grid: &ChunkGrid<B, N>,
+    grid: &Grid<B, N>,
 ) -> (Mesh, CustomMD<B>) {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
 
@@ -66,5 +66,12 @@ pub fn meshify_custom_voxels<B: BlockInGrid, const N: usize>(
         mesh.insert_attribute(att, vals);
     }
     mesh.set_indices(Some(Indices::U32(indices)));
-    (mesh, CustomMD { vivi, log: vec![] })
+    (
+        mesh,
+        CustomMD {
+            vivi,
+            log: vec![],
+            dims: grid.dims,
+        },
+    )
 }

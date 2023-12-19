@@ -10,6 +10,7 @@ pub(crate) type CustomVIVI = HashMap<BlockPos, (VertexIndex, IndexIndex)>;
 pub struct CustomMD<B: BlockInGrid> {
     pub(crate) vivi: CustomVIVI,
     pub(crate) log: Vec<(BlockMeshChange, B, BlockPos)>,
+    pub(crate) dims: Dimensions,
 }
 
 impl<B: BlockInGrid> CustomMD<B> {

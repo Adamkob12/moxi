@@ -6,7 +6,6 @@ pub fn update_xsprite_mesh<B: BlockInGrid>(
     reg: &impl MeshRegistry<B>,
     mesh: &mut Mesh,
     md: &mut XSpriteMD<B>,
-    dims: Dimensions,
 ) {
     for (change, block, block_pos) in md.log.iter().filter(|(_, block, _)| reg.is_xsprite(block)) {
         match change {
@@ -16,10 +15,10 @@ pub fn update_xsprite_mesh<B: BlockInGrid>(
                 *block_pos,
                 reg.get_block_mesh_ref(block).unwrap(),
                 reg.get_block_dims().into(),
-                dims,
+                md.dims,
             ),
             BlockMeshChange::Broken => {
-                remove_xsprite_voxel(mesh, &mut md.vivi, *block_pos, dims);
+                remove_xsprite_voxel(mesh, &mut md.vivi, *block_pos, md.dims);
             }
             _ => debug_assert!(false, "tried using unsupported VoxelChange in XSpriteMesh"),
         }

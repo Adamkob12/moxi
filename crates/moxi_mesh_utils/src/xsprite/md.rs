@@ -9,6 +9,7 @@ pub(crate) type XSpriteVIVI = Vec<(usize, usize, u32, u32)>;
 pub struct XSpriteMD<B: BlockInGrid> {
     pub(crate) vivi: XSpriteVIVI,
     pub(crate) log: Vec<(BlockMeshChange, B, BlockPos)>,
+    pub(crate) dims: Dimensions,
 }
 
 impl<B: BlockInGrid> XSpriteMD<B> {

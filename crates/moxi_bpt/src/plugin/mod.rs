@@ -11,6 +11,8 @@ pub struct MoxiBptPlugin;
 
 pub struct Air;
 
+pub const RENDER_DISTANCE: i32 = 10;
+
 impl Block for Air {
     fn get_name() -> &'static str {
         "Air"

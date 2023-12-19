@@ -12,7 +12,7 @@ pub fn introduce_adjacent_chunks<B: BlockInGrid, const N: usize>(
     reg: &impl MeshRegistry<B>,
     main_md: &mut CubeMD<B>,
     connection_side: Face,
-    adjacent_chunk_grid: &ChunkGrid<B, N>,
+    adjacent_chunk_grid: &Grid<B, N>,
 ) {
     assert_eq!(
         adjacent_chunk_grid.len(),

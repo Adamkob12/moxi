@@ -6,10 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bevy_tasks = { version = "0.12", features = ["multi-threaded"] }
 bevy_ecs = "0.12"
 bevy_asset = "0.12"
 bevy_reflect = "0.12"
 bevy_render = "0.12"
 bevy_app = "0.12"
+bevy_hierarchy = "0.12"
+bevy_pbr = "0.12"
+bevy_transform = "0.12"
+bevy_math = "0.12"
 moxi_mesh_utils = { path = "../moxi_mesh_utils" }
 moxi_utils = { path = "../moxi_utils" }
+futures-lite = "2"

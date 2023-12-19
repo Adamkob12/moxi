@@ -21,7 +21,7 @@ pub enum MeshingAlgorithm {
 /// Returns the mesh and the mesh metadata.
 pub fn meshify_cubic_voxels<B: BlockInGrid, const N: usize>(
     outer_layer: &[Face],
-    grid: &ChunkGrid<B, N>,
+    grid: &Grid<B, N>,
     reg: &impl MeshRegistry<B>,
     meshing_algorithm: MeshingAlgorithm,
     smooth_lighting_params: Option<SmoothLightingParameters>,
