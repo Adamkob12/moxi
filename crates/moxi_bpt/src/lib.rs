@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub(crate) use bevy_ecs::prelude::*;
 
 pub(crate) mod action;

@@ -5,7 +5,8 @@ use crate::{
     chunk::{
         chunkbuilder::{BoxedBuilder, ChunkBuilder},
         components::{
-            Chunk, ChunkGrid, CubeMeshChunk, CustomMeshChunk, MeshChunk, XSpriteMeshChunk,
+            ChildMeshChunks, Chunk, ChunkGrid, CubeMeshChunk, CustomMeshChunk, MeshChunk,
+            ToIntroduce, XSpriteMeshChunk,
         },
         meshmd::ChunkMeshMd,
         resources::{ChunkMap, ChunkQueue, CurrentChunk},
@@ -83,6 +84,7 @@ pub fn spawn_chunks<const N: usize>(
                         Chunk { cords },
                         chunk_grid,
                         SpatialBundle::from_transform(parent_transform),
+                        ToIntroduce::new(cords),
                     ))
                     .id();
 
@@ -124,6 +126,12 @@ pub fn spawn_chunks<const N: usize>(
                         custom_mesh_md,
                     ))
                     .id();
+
+                commands.entity(parent_chunk).insert(ChildMeshChunks {
+                    cube_mesh_chunk,
+                    xsprite_mesh_chunk,
+                    custom_mesh_chunk,
+                });
 
                 commands.entity(parent_chunk).push_children(&[
                     cube_mesh_chunk,

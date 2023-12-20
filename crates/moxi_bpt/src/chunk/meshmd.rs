@@ -58,4 +58,11 @@ impl ChunkMeshMd {
             ChunkMeshMd::Xsprite(_) | ChunkMeshMd::Custom(_) => {}
         }
     }
+
+    pub fn get_cube_md_mut(&mut self) -> Option<&mut CubeMD<BlockId>> {
+        match self {
+            ChunkMeshMd::Cube(md) => Some(md),
+            _ => None,
+        }
+    }
 }

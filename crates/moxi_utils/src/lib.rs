@@ -43,8 +43,6 @@ pub mod block {
         pub id: BlockId,
     }
 
-    pub type BlockName = &'static str;
-
     impl BlockInGrid for GridBlock {
         fn id(&self) -> BlockId {
             self.id
