@@ -3,10 +3,40 @@ use crate::prelude::Trigger;
 use crate::*;
 use action::{Action, IntoActionSet};
 use bevy_ecs::world::unsafe_world_cell::UnsafeWorldCell;
+use lazy_static::lazy_static;
 use moxi_utils::prelude::BlockId;
 use prelude::{Block, BlockRegistry, CommonActionSet, IntoTrigger};
 use std::any::TypeId;
 use std::collections::HashMap;
+use std::sync::Mutex;
+
+lazy_static! {
+    pub(crate) static ref NAME_2_ID: Mutex<HashMap<&'static str, BlockId>> =
+        Mutex::new(HashMap::new());
+    pub(crate) static ref ID_2_NAME: Mutex<HashMap<BlockId, &'static str>> =
+        Mutex::new(HashMap::new());
+    pub static ref BLOCKS_GLOBAL: () = ();
+}
+
+impl BLOCKS_GLOBAL {
+    pub fn get_id(name: &'static str) -> Option<BlockId> {
+        let name_2_id = NAME_2_ID.lock().unwrap();
+        name_2_id.get(name).copied()
+    }
+
+    pub fn get_name(id: BlockId) -> Option<&'static str> {
+        let id_2_name = ID_2_NAME.lock().unwrap();
+        id_2_name.get(&id).copied()
+    }
+
+    pub fn id(name: &'static str) -> BlockId {
+        Self::get_id(name).unwrap_or(0)
+    }
+
+    pub fn name(id: BlockId) -> &'static str {
+        Self::get_name(id).unwrap_or("Air")
+    }
+}
 
 type TriggerId = TypeId;
 type ActionId = TypeId;
@@ -160,7 +190,7 @@ impl BlockInitiallizerTrait for World {
         let block_name = B::get_name();
         let block_id = self
             .get_resource::<BlockRegistry>()
-            .map_or(0, |reg| reg.name_to_id.len()) as BlockId;
+            .map_or(0, |reg| reg.names.len()) as BlockId;
         if block_id == 0 {
             self.init_resource::<BlockRegistry>();
             self.init_resource::<MeshReg>();
@@ -169,12 +199,16 @@ impl BlockInitiallizerTrait for World {
             self.init_resource::<TriggersMap>();
         }
 
-        self.resource_mut::<BlockRegistry>()
-            .name_to_id
-            .insert(block_name, block_id);
-        self.resource_mut::<BlockRegistry>()
-            .id_to_name
-            .insert(block_id, block_name);
+        assert!(
+            self.resource_mut::<BlockRegistry>()
+                .names
+                .insert(block_name),
+            "Block name already exists"
+        );
+
+        NAME_2_ID.lock().unwrap().insert(block_name, block_id);
+        ID_2_NAME.lock().unwrap().insert(block_id, block_name);
+
         self.resource_mut::<MeshReg>().meshes.push(B::get_mesh());
 
         unsafe {

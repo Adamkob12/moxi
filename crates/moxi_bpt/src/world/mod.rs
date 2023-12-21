@@ -3,12 +3,13 @@ pub(crate) mod blocks_param;
 pub(crate) mod blockworld;
 pub(crate) mod update_event;
 
+pub use blocks_param::Blocks;
 pub use update_event::*;
 
 #[cfg(test)]
 mod tests {
     use super::blockworld::*;
-    use crate::{blockreg::meshreg::MeshReg, prelude::*};
+    use crate::blockreg::meshreg::MeshReg;
     use bevy_ecs::prelude::*;
     use defs::*;
     use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
@@ -18,7 +19,6 @@ mod tests {
         use crate::prelude::*;
         use bevy_ecs::prelude::*;
         use moxi_mesh_utils::prelude::*;
-        use moxi_utils::prelude::Face;
         pub struct Block1;
         pub struct Block2;
 
@@ -41,14 +41,7 @@ mod tests {
                 generate_cube_mesh(
                     [1.0; 3],
                     [10, 10],
-                    [
-                        (Face::Top, [0, 0]),
-                        (Face::Bottom, [0, 0]),
-                        (Face::Left, [0, 0]),
-                        (Face::Right, [0, 0]),
-                        (Face::Front, [0, 0]),
-                        (Face::Back, [0, 0]),
-                    ],
+                    CubeTextureCords::uniform([0, 0]),
                     [0.0; 3],
                     0.0,
                     Some(1.0),
@@ -147,10 +140,9 @@ mod tests {
             );
 
         let block_entity = {
-            let block_reg = world.resource::<BlockRegistry>();
-            let block_id = block_reg.name_to_id.get("Block1").unwrap();
+            let block_id = BLOCKS_GLOBAL::get_id("Block1").unwrap();
             let block_id_to_ent = world.resource::<BlockIdtoEnt>();
-            let block_entity = block_id_to_ent.0.get(block_id).unwrap();
+            let block_entity = block_id_to_ent.0.get(&block_id).unwrap();
             *block_entity
         };
 

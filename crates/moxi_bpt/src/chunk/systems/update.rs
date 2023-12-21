@@ -38,7 +38,7 @@ pub fn handle_chunk_updates(
                 update_xsprite_mesh(mesh_registry, chunk_mesh, md);
             }
             (ChunkMeshType::Custom, ChunkMeshMd::Custom(ref mut md)) => {
-                update_custom_mesh(mesh_registry, chunk_mesh, md)
+                update_custom_mesh(mesh_registry, chunk_mesh, md);
             }
             _ => panic!("Chunk mesh type and mesh meta-data type mismatch"),
         }
@@ -61,8 +61,8 @@ pub fn introduce_adj_chunks<const N: usize>(
     mesh_registry: Res<MeshReg>,
 ) {
     let mesh_registry = mesh_registry.into_inner();
-    let mut couldnt_introduce = Vec::new();
     for (chunk_entity, child_mesh_chunks, mut to_introduce) in parent_chunks.iter_mut() {
+        let mut couldnt_introduce = Vec::new();
         let chunk_cords = to_introduce.cords;
         for connection_face in to_introduce.adj_chunks_to_introduce.drain(..) {
             let adj_chunk_cords = adj_chunk(chunk_cords, connection_face);
@@ -84,6 +84,8 @@ pub fn introduce_adj_chunks<const N: usize>(
         }
         if couldnt_introduce.is_empty() {
             commands.entity(chunk_entity).remove::<ToIntroduce>();
+        } else {
+            to_introduce.adj_chunks_to_introduce = couldnt_introduce;
         }
     }
 }

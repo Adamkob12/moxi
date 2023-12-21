@@ -10,7 +10,7 @@ pub struct ChunkMap(HashMap<ChunkCords, Entity>);
 pub struct ChunkQueue(Vec<ChunkCords>);
 
 #[derive(Resource)]
-pub struct CurrentChunk(ChunkCords);
+pub struct CurrentChunk(pub ChunkCords);
 
 impl Default for CurrentChunk {
     fn default() -> Self {
@@ -57,7 +57,7 @@ impl ChunkMap {
     pub fn extract_if(&mut self, mut predicate: impl FnMut(&ChunkCords) -> bool) -> Vec<Entity> {
         let mut entities = Vec::new();
         self.0.retain(|cords, entity| {
-            if predicate(cords) {
+            if predicate(cords) && *entity != Entity::PLACEHOLDER {
                 entities.push(*entity);
                 false
             } else {

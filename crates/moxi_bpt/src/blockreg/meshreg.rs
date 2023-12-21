@@ -5,7 +5,7 @@ use bevy_render::mesh::Mesh;
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshRef, BlockMeshType, MeshRegistry};
 use moxi_utils::prelude::BlockId;
 
-#[derive(Reflect, Resource, Default)]
+#[derive(Reflect, Resource, Default, Clone)]
 pub struct MeshReg {
     pub(crate) meshes: Vec<BlockMesh>,
     pub(crate) assets: Vec<AssetId<Mesh>>,

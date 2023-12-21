@@ -27,7 +27,7 @@ pub fn update_cube_mesh<B: BlockInGrid>(
         );
         let cube_neighbors: [bool; 6] = FACES
             .iter()
-            .map(|face| surrounding_blocks[*face].map_or(true, |b| !reg.is_cube(&b)))
+            .map(|face| surrounding_blocks[*face].map_or(false, |b| reg.is_cube(&b)))
             .collect::<Vec<bool>>()
             .try_into()
             .unwrap();
@@ -98,12 +98,7 @@ pub fn update_cube_mesh<B: BlockInGrid>(
                     mesh,
                     &mut metadata.vivi,
                     *block_pos,
-                    surrounding_blocks
-                        .iter()
-                        .map(|x| x.is_none())
-                        .collect::<Vec<bool>>()
-                        .try_into()
-                        .unwrap(),
+                    cube_neighbors,
                     metadata.dims,
                 );
             }
@@ -237,11 +232,11 @@ pub(crate) fn add_quads_facing(
 
 /// This function adds a block to the mesh after it has been generated. The function wil autmoatically
 /// cull the new unneeded faces.
-/// `surrounding_block_is_cube`:
+/// `quads_to_keep`:
 /// The faces of the block that are not covered by other blocks.
 /// Will not add a face if its corresponding value is true.
 fn add_voxel_after_gen(
-    mut surrounding_block_is_cube: [bool; 6],
+    mut quads_to_keep: [bool; 6],
     main_mesh: &mut Mesh,
     block_mesh: &Mesh,
     vivi: &mut CubeVIVI,
@@ -252,7 +247,7 @@ fn add_voxel_after_gen(
 ) {
     let block_index = pos_to_index(block_pos, dims).unwrap();
     // Make sure we are not adding quads that already exist
-    for (i, b) in surrounding_block_is_cube.iter_mut().enumerate() {
+    for (i, b) in quads_to_keep.iter_mut().enumerate() {
         let face = Face::from(i);
         if !*b && vivi.get_quad_index(face, block_index).is_some() {
             *b = true;
@@ -299,12 +294,12 @@ fn add_voxel_after_gen(
         for i in 0..3 {
             if v1[i] == v2[i] && v2[i] == v3[i] && v1[i] == v3[i] {
                 match (i, center[i] > v1[i]) {
-                    (0, true) if !surrounding_block_is_cube[3] => save = (true, Face::Left),
-                    (0, false) if !surrounding_block_is_cube[2] => save = (true, Face::Right),
-                    (1, true) if !surrounding_block_is_cube[1] => save = (true, Face::Bottom),
-                    (1, false) if !surrounding_block_is_cube[0] => save = (true, Face::Top),
-                    (2, true) if !surrounding_block_is_cube[5] => save = (true, Face::Front),
-                    (2, false) if !surrounding_block_is_cube[4] => save = (true, Face::Back),
+                    (0, true) if !quads_to_keep[3] => save = (true, Face::Left),
+                    (0, false) if !quads_to_keep[2] => save = (true, Face::Right),
+                    (1, true) if !quads_to_keep[1] => save = (true, Face::Bottom),
+                    (1, false) if !quads_to_keep[0] => save = (true, Face::Top),
+                    (2, true) if !quads_to_keep[5] => save = (true, Face::Front),
+                    (2, false) if !quads_to_keep[4] => save = (true, Face::Back),
                     _ => save = (false, Face::Top),
                 }
                 break;

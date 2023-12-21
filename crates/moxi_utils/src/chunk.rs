@@ -186,16 +186,8 @@ pub fn iter_blocks_on_edge(edge: Face, dims: Dimensions) -> impl Iterator<Item =
         .into_iter()
 }
 
-pub fn is_block_pos_on_edge(mut block_pos: BlockPos, edge: Face, dims: Dimensions) -> bool {
-    match edge {
-        Face::Top => block_pos.y += 1,
-        Face::Bottom => block_pos.y -= 1,
-        Face::Right => block_pos.x += 1,
-        Face::Left => block_pos.x -= 1,
-        Face::Back => block_pos.z += 1,
-        Face::Front => block_pos.z -= 1,
-    }
-    !pos_in_bounds(block_pos, dims)
+pub fn is_block_pos_on_edge(block_pos: BlockPos, edge: Face, dims: Dimensions) -> bool {
+    neighbor_pos(block_pos, edge, dims).is_none()
 }
 
 fn is_block_index_on_edge(block_index: BlockIndex, edge: Face, dims: Dimensions) -> bool {
@@ -230,26 +222,20 @@ pub const fn pos_to_index(block_pos: UVec3, dims: Dimensions) -> Option<BlockInd
     }
 }
 
-fn neighbor_index(mut block_pos: BlockPos, face: Face, dims: Dimensions) -> Option<BlockIndex> {
-    match face {
-        Face::Top => block_pos.y += 1,
-        Face::Bottom => block_pos.y -= 1,
-        Face::Right => block_pos.x += 1,
-        Face::Left => block_pos.x -= 1,
-        Face::Back => block_pos.z += 1,
-        Face::Front => block_pos.z -= 1,
-    }
-    pos_to_index(block_pos, dims)
+fn neighbor_index(block_pos: BlockPos, face: Face, dims: Dimensions) -> Option<BlockIndex> {
+    neighbor_pos(block_pos, face, dims)
+        .map(|pos| pos_to_index(pos, dims))
+        .flatten()
 }
 
 pub fn neighbor_pos(mut block_pos: BlockPos, face: Face, dims: Dimensions) -> Option<BlockPos> {
     match face {
         Face::Top => block_pos.y += 1,
-        Face::Bottom => block_pos.y -= 1,
+        Face::Bottom => block_pos.y = block_pos.y.checked_sub(1)?,
         Face::Right => block_pos.x += 1,
-        Face::Left => block_pos.x -= 1,
+        Face::Left => block_pos.x = block_pos.x.checked_sub(1)?,
         Face::Back => block_pos.z += 1,
-        Face::Front => block_pos.z -= 1,
+        Face::Front => block_pos.z = block_pos.z.checked_sub(1)?,
     }
     if pos_in_bounds(block_pos, dims) {
         Some(block_pos)

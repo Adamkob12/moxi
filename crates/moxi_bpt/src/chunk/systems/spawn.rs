@@ -13,6 +13,7 @@ use crate::{
         CubeMeshMaterial, CustomMeshMaterial, XSpriteMeshMaterial,
     },
     plugin::RENDER_DISTANCE,
+    prelude::components::ChunkMeshType,
 };
 use bevy_asset::Assets;
 use bevy_ecs::prelude::*;
@@ -52,6 +53,7 @@ pub fn spawn_chunks<const N: usize>(
     cube_mesh_material: Res<CubeMeshMaterial>,
     xsprite_mesh_material: Res<XSpriteMeshMaterial>,
     custom_mesh_material: Res<CustomMeshMaterial>,
+    mut chunk_map: ResMut<ChunkMap>,
 ) {
     chunks_tasks_query
         .iter_mut()
@@ -98,6 +100,7 @@ pub fn spawn_chunks<const N: usize>(
                             ..Default::default()
                         },
                         cube_mesh_md,
+                        ChunkMeshType::Cube,
                     ))
                     .id();
 
@@ -111,6 +114,7 @@ pub fn spawn_chunks<const N: usize>(
                             ..Default::default()
                         },
                         xsprite_mesh_md,
+                        ChunkMeshType::XSprite,
                     ))
                     .id();
 
@@ -124,6 +128,7 @@ pub fn spawn_chunks<const N: usize>(
                             ..Default::default()
                         },
                         custom_mesh_md,
+                        ChunkMeshType::Custom,
                     ))
                     .id();
 
@@ -138,6 +143,8 @@ pub fn spawn_chunks<const N: usize>(
                     xsprite_mesh_chunk,
                     custom_mesh_chunk,
                 ]);
+
+                chunk_map.insert_chunk(cords, parent_chunk);
             }
         });
 }
@@ -175,12 +182,12 @@ pub fn despawn_chunks(
 pub fn build_chunks<const N: usize>(
     mut chunk_queue: ResMut<ChunkQueue>,
     chunk_builder: Res<BoxedBuilder<N>>,
-    mesh_registry: Res<'static, MeshReg>,
+    mesh_registry: Res<MeshReg>,
     mut chunk_map: ResMut<ChunkMap>,
     mut commands: Commands,
 ) {
     let async_task_pool = AsyncComputeTaskPool::get();
-    let mesh_registry = Arc::new(mesh_registry.into_inner());
+    let mesh_registry = Arc::new(mesh_registry.clone());
     for chunk_cords in chunk_queue.drain() {
         chunk_map.insert_chunk(chunk_cords, Entity::PLACEHOLDER);
         let new_mesh_reg = Arc::clone(&mesh_registry);
@@ -189,14 +196,14 @@ pub fn build_chunks<const N: usize>(
             let (cube_chunk_mesh, cube_mesh_md) = meshify_cubic_voxels(
                 &[Face::Bottom],
                 &chunk_grid,
-                *new_mesh_reg,
+                new_mesh_reg.as_ref(),
                 MeshingAlgorithm::Culling,
                 None,
             )?;
             let (xsprite_chunk_mesh, xsprite_mesh_md) =
-                meshify_xsprite_voxels(*new_mesh_reg, &chunk_grid);
+                meshify_xsprite_voxels(new_mesh_reg.as_ref(), &chunk_grid);
             let (custom_chunk_mesh, custom_mesh_md) =
-                meshify_custom_voxels(*new_mesh_reg, &chunk_grid);
+                meshify_custom_voxels(new_mesh_reg.as_ref(), &chunk_grid);
 
             Some(ChunkGenResult {
                 cords: chunk_cords,

@@ -29,8 +29,8 @@ pub fn meshify_cubic_voxels<B: BlockInGrid, const N: usize>(
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
     let total_voxels = grid.len();
     let mut vivi = CubeVIVI::new(total_voxels);
-    let outer_layers_to_call = {
-        let mut r = [true, true, true, true, true, true];
+    let outer_layers_to_keep = {
+        let mut r = [true; 6];
         for f in outer_layer {
             r[*f as usize] = false;
         }
@@ -48,19 +48,22 @@ pub fn meshify_cubic_voxels<B: BlockInGrid, const N: usize>(
     for (block_pos, block) in grid.enumerate_blocks().filter(|(_, v)| reg.is_cube(v)) {
         let position_offset = Vec3::from(voxel_dims) * block_pos.as_vec3();
 
-        let sides_to_cull = match meshing_algorithm {
-            MeshingAlgorithm::Culling => grid.enumerate_neighbors(block_pos).map(|(f, n)| {
-                n.map_or_else(|| outer_layers_to_call[f as usize], |t| reg.is_cube(&t))
+        let quads_to_keep = match meshing_algorithm {
+            MeshingAlgorithm::Culling => grid.enumerate_neighbors(block_pos).map(|(f, block)| {
+                block.map_or_else(
+                    || outer_layers_to_keep[f as usize],
+                    |block| !reg.is_cube(&block),
+                )
             }),
             MeshingAlgorithm::Naive => [true; 6],
         };
 
-        if sides_to_cull == [false; 6] {
+        if quads_to_keep == [false; 6] {
             continue;
         }
 
         add_vertices_normal_cube(
-            sides_to_cull,
+            quads_to_keep,
             &mut indices,
             &mut vertices,
             reg.get_block_mesh_ref(&block).unwrap(),

@@ -19,3 +19,4 @@ bevy_math = "0.12"
 moxi_mesh_utils = { path = "../moxi_mesh_utils" }
 moxi_utils = { path = "../moxi_utils" }
 futures-lite = "2"
+lazy_static = "1.4"

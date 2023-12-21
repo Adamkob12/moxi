@@ -4,7 +4,7 @@ use crate::*;
 use moxi_utils::prelude::*;
 
 pub trait ChunkBuilder<const N: usize, B: BlockInGrid>: Send + Sync {
-    fn build_chunk(&self, chunk_cods: ChunkCords) -> Grid<B, N>;
+    fn build_chunk(&self, chunk_cords: ChunkCords) -> Grid<B, N>;
 }
 
 #[derive(Resource)]

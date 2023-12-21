@@ -2,10 +2,11 @@ mod misc;
 mod spawn;
 mod update;
 
+pub(crate) use spawn::*;
+pub(crate) use update::*;
+
 #[cfg(test)]
 mod test {
-    use super::spawn::*;
-    use bevy_ecs::world::World;
 
     #[test]
     fn test_systems() {}

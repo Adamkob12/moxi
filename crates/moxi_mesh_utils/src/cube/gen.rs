@@ -6,7 +6,7 @@ use crate::*;
 pub fn generate_cube_mesh(
     voxel_dims: [f32; 3],
     texture_atlas_dims: [u32; 2],
-    texture: [(Face, [u32; 2]); 6],
+    texture: CubeTextureCords,
     voxel_center: [f32; 3],
     padding: f32,
     default_color_intensity: Option<f32>,
@@ -19,6 +19,15 @@ pub fn generate_cube_mesh(
     let nx = x - voxel_dims[0];
     let z = voxel_dims[2] / 2.0 + voxel_center[2];
     let nz = z - voxel_dims[2];
+
+    let texture = [
+        (Face::Top, texture.top),
+        (Face::Bottom, texture.bottom),
+        (Face::Right, texture.right),
+        (Face::Left, texture.left),
+        (Face::Back, texture.back),
+        (Face::Front, texture.front),
+    ];
 
     let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
     let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);

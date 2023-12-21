@@ -2,11 +2,13 @@
 
 use crate::{block_mesh::BlockMesh, *};
 
+use super::XSpriteTextureCords;
+
 /// Function that generates a xsprite mesh.
 pub fn generate_xsprite_mesh(
     voxel_dims: [f32; 3],
     texture_atlas_dims: [u32; 2],
-    texture: [u32; 2],
+    texture: XSpriteTextureCords,
     voxel_center: [f32; 3],
     padding: f32,
     default_color_intensity: Option<f32>,
@@ -31,6 +33,8 @@ pub fn generate_xsprite_mesh(
 
     let u: f32 = 1.0 / (texture_atlas_dims[0] as f32);
     let v: f32 = 1.0 / (texture_atlas_dims[1] as f32);
+
+    let texture = texture.sprite;
 
     let padding_u = padding / (texture_atlas_dims[0] as f32);
     let padding_v = padding / (texture_atlas_dims[1] as f32);

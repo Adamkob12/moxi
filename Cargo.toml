@@ -37,6 +37,11 @@ moxi_derive = { path = "crates/moxi_derive" }
 moxi_physics = { path = "crates/moxi_physics" }
 moxi_ui = { path = "crates/moxi_ui" }
 
+[dev-dependencies]
+bevy = "0.12"
+bevy_flycam = "*"
+
+
 [features]
 default = ["block_id_16"]
 # Bits per block id

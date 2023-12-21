@@ -30,6 +30,7 @@ pub(crate) use mesh_reg::*;
 pub(crate) use sl::*;
 pub(crate) use vav_utils::*;
 
+pub type AtlasCords = [u32; 2];
 /// This enum represents all the way a voxel could be changed.
 #[derive(Clone, Copy)]
 pub enum BlockMeshChange {
