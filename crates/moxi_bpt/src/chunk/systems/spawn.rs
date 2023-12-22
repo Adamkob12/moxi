@@ -29,7 +29,7 @@ use moxi_mesh_utils::prelude::{
 };
 use moxi_utils::prelude::{chunk_distance, ChunkCords, Face};
 
-const CHUNK_TRANSLATION_OFFSET: Vec3 = Vec3::splat(0.5);
+const CHUNK_TRANSLATION_OFFSET: Vec3 = Vec3::splat(0.0);
 
 #[derive(Component)]
 pub struct ComputeChunk<const N: usize>(Task<Option<ChunkGenResult<N>>>);

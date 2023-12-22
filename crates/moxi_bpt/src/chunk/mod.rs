@@ -10,6 +10,7 @@ use bevy_asset::Handle;
 use bevy_ecs::{prelude::resource_changed, schedule::IntoSystemConfigs, system::Resource};
 use bevy_pbr::StandardMaterial;
 
+pub use components::{Chunk, MeshChunk};
 pub use resources::CurrentChunk;
 
 pub struct ChunkPlugin<const N: usize>;

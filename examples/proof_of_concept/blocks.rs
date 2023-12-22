@@ -26,7 +26,8 @@ impl Plugin for BlocksPlugin {
     }
 }
 
-type BlocksX<'w, 's> = Blocks<'w, 's, BLOCKS_IN_CHUNK>;
+pub type BlocksX<'w, 's> = Blocks<'w, 's, BLOCKS_IN_CHUNK>;
+pub type BlocksMutX<'w, 's> = BlocksMut<'w, 's, BLOCKS_IN_CHUNK>;
 
 fn trigger_if_block_above_is_not_air(
     block_world_update: In<BlockWorldUpdateEvent>,
@@ -39,21 +40,12 @@ fn trigger_if_block_above_is_not_air(
     blocks.block_name_at(chunk_cords, block_above_pos) != "Air"
 }
 
-fn transform_into<B: Block>(block_world_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksX) {
+fn transform_into<B: Block>(block_world_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksMutX) {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
 
     blocks.set_block_at_name(chunk_cords, block_pos, B::get_name());
 }
-
-//
-//
-//
-//
-//
-//
-//
-//
 
 pub struct Grass;
 

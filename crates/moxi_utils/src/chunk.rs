@@ -56,6 +56,65 @@ impl<B> std::ops::Index<Face> for SurroundingBlocks<B> {
     }
 }
 
+impl<B> std::ops::IndexMut<Face> for SurroundingBlocks<B> {
+    fn index_mut(&mut self, face: Face) -> &mut Self::Output {
+        match face {
+            Face::Top => &mut self[0],
+            Face::Bottom => &mut self[1],
+            Face::Right => &mut self[2],
+            Face::Left => &mut self[3],
+            Face::Back => &mut self[4],
+            Face::Front => &mut self[5],
+        }
+    }
+}
+
+pub trait SurroundingBlocksCommon<B> {
+    fn top(&self) -> &Option<B>;
+    fn bottom(&self) -> &Option<B>;
+    fn right(&self) -> &Option<B>;
+    fn left(&self) -> &Option<B>;
+    fn back(&self) -> &Option<B>;
+    fn front(&self) -> &Option<B>;
+    fn with_face(self, face: Face, block: B) -> Self;
+    fn uniform(block: B) -> Self;
+}
+
+impl<B: BlockInGrid> SurroundingBlocksCommon<B> for SurroundingBlocks<B> {
+    fn top(&self) -> &Option<B> {
+        &self[0]
+    }
+
+    fn bottom(&self) -> &Option<B> {
+        &self[1]
+    }
+
+    fn right(&self) -> &Option<B> {
+        &self[2]
+    }
+
+    fn left(&self) -> &Option<B> {
+        &self[3]
+    }
+
+    fn back(&self) -> &Option<B> {
+        &self[4]
+    }
+
+    fn front(&self) -> &Option<B> {
+        &self[5]
+    }
+
+    fn with_face(mut self, face: Face, block: B) -> Self {
+        self[face] = Some(block);
+        self
+    }
+
+    fn uniform(block: B) -> Self {
+        [Some(block); 6]
+    }
+}
+
 impl<T: BlockInGrid, const N: usize> Grid<T, N> {
     pub fn get_block(&self, block_pos: BlockPos) -> Option<T> {
         pos_to_index(block_pos, self.dims).map(|i| self.grid[i])

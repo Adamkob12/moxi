@@ -210,8 +210,8 @@ pub(crate) fn add_quads_facing(
     dims: Dimensions,
 ) {
     for &(face, vmesh) in neighboring_cube_meshes.iter() {
-        let mut neig = [false; 6];
-        neig[face.opposite() as usize] = true;
+        let mut neig = [true; 6];
+        neig[face.opposite() as usize] = false;
         let neighbor_pos = match neighbor_pos(block_pos, face, dims) {
             None => continue,
             Some(j) => j,

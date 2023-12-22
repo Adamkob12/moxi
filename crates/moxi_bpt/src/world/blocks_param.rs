@@ -1,14 +1,10 @@
-use crate::blockreg::meshreg::MeshReg;
-use crate::chunk::components::{ChildMeshChunks, ChunkGrid, ToUpdate};
-use crate::chunk::meshmd::ChunkMeshMd;
+use crate::chunk::components::{ChildMeshChunks, ChunkGrid};
 use crate::chunk::resources::ChunkMap;
 use crate::prelude::{
-    BlockIdtoEnt, BlockMarker, BlockName, BlockUpdate, BlockUpdateType, BlockWorldUpdateEvent,
-    BLOCKS_GLOBAL,
+    BlockIdtoEnt, BlockMarker, BlockName, GlobalBlockBreak, GlobalBlockPlace, BLOCKS_GLOBAL,
 };
 use bevy_ecs::prelude::*;
 use bevy_ecs::system::SystemParam;
-use moxi_mesh_utils::prelude::MeshRegistry;
 use moxi_utils::prelude::{
     global_enumerate_neighboring_blocks, BlockGlobalPos, BlockId, BlockPos, ChunkCords, Dimensions,
     Face, Grid, SurroundingBlocks,
@@ -16,56 +12,52 @@ use moxi_utils::prelude::{
 
 #[derive(SystemParam)]
 pub struct Blocks<'w, 's, const N: usize> {
-    commands: Commands<'w, 's>,
     blocks_query: Query<'w, 's, (&'static BlockMarker, &'static BlockName)>,
-    chunk_map: Res<'w, ChunkMap>,
-    chunks_query: Query<'w, 's, (&'static mut ChunkGrid<N>, &'static ChildMeshChunks)>,
-    chunk_meshes_query: Query<'w, 's, &'static mut ChunkMeshMd>,
+    pub(crate) chunk_map: Res<'w, ChunkMap>,
+    pub(crate) chunks_query: Query<'w, 's, (&'static mut ChunkGrid<N>, &'static ChildMeshChunks)>,
     block_id_to_ent: Res<'w, BlockIdtoEnt>,
-    mesh_registry: Res<'w, MeshReg>,
-    block_world_update_sender: EventWriter<'w, BlockWorldUpdateEvent>,
 }
 
-impl<'w, 's, const N: usize> Blocks<'w, 's, N> {
+#[derive(SystemParam)]
+pub struct BlocksMut<'w, 's, const N: usize> {
+    blocks: Blocks<'w, 's, N>,
+    global_block_place_sender: EventWriter<'w, GlobalBlockPlace>,
+    global_block_break_sender: EventWriter<'w, GlobalBlockBreak>,
+}
+
+impl<'w, 's, const N: usize> std::ops::Deref for BlocksMut<'w, 's, N> {
+    type Target = Blocks<'w, 's, N>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.blocks
+    }
+}
+
+impl<'w, 's, const N: usize> BlocksMut<'w, 's, N> {
     pub fn set_block_at_id(
         &mut self,
         chunk_cords: ChunkCords,
         block_pos: BlockPos,
         block_id: BlockId,
     ) {
-        let surrounding_blocks = self.get_global_surrounding_blocks(chunk_cords, block_pos);
-        let chunk = self.chunk_map.get_chunk(chunk_cords).unwrap();
-        let mut chunk = self.chunks_query.get_mut(chunk).unwrap();
-        let _ = chunk.0.set_block(block_id, block_pos);
-        let mesh_type = self.mesh_registry.get_block_mesh_type(&block_id);
-        let chunk_mesh_entity = chunk.1.get_from_type(mesh_type.into());
-        let mut chunk_mesh_md = self.chunk_meshes_query.get_mut(chunk_mesh_entity).unwrap();
-        self.commands.entity(chunk_mesh_entity).insert(ToUpdate);
-        chunk_mesh_md.log_block_add(
-            block_pos,
-            block_id,
-            surrounding_blocks.map(|x| x.map(|(_, _, _, id)| id)),
-        );
-        self.block_world_update_sender.send(BlockWorldUpdateEvent {
-            block_id,
-            block_pos,
-            chunk_cords,
-            block_update: BlockUpdate::Pure(BlockUpdateType::BlockPlaced),
-        });
-        surrounding_blocks
-            .iter()
-            .filter_map(|x| *x)
-            .for_each(|(face, cc, bp, id)| {
-                self.block_world_update_sender.send(BlockWorldUpdateEvent {
-                    block_id: id,
-                    block_pos: bp,
-                    chunk_cords: cc,
-                    block_update: BlockUpdate::Reaction(
-                        face.opposite(),
-                        BlockUpdateType::BlockPlaced,
-                    ),
-                })
+        let current_block = self.get_block_id_at(chunk_cords, block_pos).unwrap_or(0);
+        if current_block == block_id {
+            return;
+        }
+        if current_block != 0 {
+            self.global_block_break_sender.send(GlobalBlockBreak {
+                chunk_cords,
+                block_pos,
+                block_id: current_block,
             });
+        }
+        if block_id != 0 {
+            self.global_block_place_sender.send(GlobalBlockPlace {
+                chunk_cords,
+                block_pos,
+                block_id,
+            });
+        }
     }
 
     pub fn set_block_at_name(
@@ -77,7 +69,9 @@ impl<'w, 's, const N: usize> Blocks<'w, 's, N> {
         let block_id = BLOCKS_GLOBAL::id(block_name);
         self.set_block_at_id(chunk_cords, block_pos, block_id);
     }
+}
 
+impl<'w, 's, const N: usize> Blocks<'w, 's, N> {
     pub fn get_block_name_at(
         &self,
         chunk_cords: ChunkCords,

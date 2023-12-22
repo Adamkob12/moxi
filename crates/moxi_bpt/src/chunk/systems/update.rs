@@ -29,6 +29,7 @@ pub fn handle_chunk_updates(
 ) {
     let mesh_registry = mesh_registry.into_inner();
     for (chunk_entity, chunk_mesh_type, mesh_handle, mut chunk_mesh_md) in &mut chunks_to_update {
+        println! {"Updating chunk mesh"};
         let chunk_mesh = meshes.get_mut(mesh_handle).unwrap();
         match (chunk_mesh_type, chunk_mesh_md.as_mut()) {
             (ChunkMeshType::Cube, ChunkMeshMd::Cube(ref mut md)) => {

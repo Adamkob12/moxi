@@ -2,12 +2,15 @@ mod blocks;
 mod chunks;
 mod player;
 
-use bevy::{prelude::*, window::WindowResolution};
-use bevy_flycam::prelude::NoCameraPlayerPlugin;
+use bevy::{prelude::*, render::primitives::Aabb, window::WindowResolution};
+use bevy_xpbd_3d::prelude::{
+    AsyncCollider, Collider, CollisionLayers, ComputedCollider, PhysicsPlugins, RigidBody,
+    TriMeshFlags,
+};
 pub use blocks::*;
 use chunks::ChunksPlugin;
 use moxi::prelude::*;
-use player::PlayerPlugin;
+use player::{PlayerPlugin, RigidLayer};
 
 pub(crate) const HEIGHT: u32 = 16;
 pub(crate) const WIDTH: u32 = 16;
@@ -33,9 +36,9 @@ fn main() {
             }),
         MoxiBptPlugin::<BLOCKS_IN_CHUNK>,
         BlocksPlugin,
-        NoCameraPlayerPlugin,
         PlayerPlugin,
         ChunksPlugin,
+        PhysicsPlugins::default(),
     ));
 
     app.insert_resource(AmbientLight {
@@ -43,5 +46,23 @@ fn main() {
         brightness: 0.8,
     });
 
+    app.add_systems(Update, insert_collider_for_chunks);
+
     app.run();
+}
+
+// Will be depracated when built in physics is introduced
+fn insert_collider_for_chunks(
+    mut commands: Commands,
+    mesh_chunks_query: Query<Entity, Or<((Without<Collider>, With<MeshChunk>), Changed<Aabb>)>>,
+) {
+    for mesh_chunk_entity in mesh_chunks_query.iter() {
+        commands
+            .entity(mesh_chunk_entity)
+            .insert(AsyncCollider(ComputedCollider::TriMeshWithFlags(
+                TriMeshFlags::MERGE_DUPLICATE_VERTICES,
+            )))
+            .insert(RigidBody::Static)
+            .insert(CollisionLayers::all_masks::<RigidLayer>().add_group(RigidLayer::Ground));
+    }
 }

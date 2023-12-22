@@ -3,7 +3,7 @@ pub(crate) mod blocks_param;
 pub(crate) mod blockworld;
 pub(crate) mod update_event;
 
-pub use blocks_param::Blocks;
+pub use blocks_param::*;
 pub use update_event::*;
 
 #[cfg(test)]
