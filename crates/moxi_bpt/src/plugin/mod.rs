@@ -33,9 +33,10 @@ impl<const N: usize> Plugin for MoxiBptPlugin<N> {
             Update,
             (
                 handle_world_block_update::<N>,
-                global_block_placer::<N>,
                 global_block_breaker::<N>,
-            ),
+                global_block_placer::<N>,
+            )
+                .chain(),
         );
     }
 }

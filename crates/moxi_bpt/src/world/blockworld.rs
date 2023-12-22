@@ -258,7 +258,6 @@ impl BlockInitiallizerTrait for World {
 pub(crate) fn global_block_placer<const N: usize>(
     mut block_place_events: EventReader<GlobalBlockPlace>,
     mut blocks: Blocks<N>,
-
     mut commands: Commands,
     mut chunk_meshes_query: Query<&mut ChunkMeshMd>,
     mesh_registry: Res<MeshReg>,
@@ -272,11 +271,11 @@ pub(crate) fn global_block_placer<const N: usize>(
         } = *event;
 
         let surrounding_blocks = blocks.get_global_surrounding_blocks(chunk_cords, block_pos);
-        let chunk = blocks.chunk_map.get_chunk(chunk_cords).unwrap();
-        let mut chunk = blocks.chunks_query.get_mut(chunk).unwrap();
-        let _ = chunk.0.set_block(block_id, block_pos);
+        let chunk_entity = blocks.chunk_map.get_chunk(chunk_cords).unwrap();
+        let mut chunk_grid = blocks.chunks_query.get_mut(chunk_entity).unwrap();
+        let _ = chunk_grid.0.set_block(block_id, block_pos);
         let mesh_type = mesh_registry.get_block_mesh_type(&block_id);
-        let chunk_mesh_entity = chunk.1.get_from_type(mesh_type.into());
+        let chunk_mesh_entity = chunk_grid.1.get_from_type(mesh_type.into());
         let mut chunk_mesh_md = chunk_meshes_query.get_mut(chunk_mesh_entity).unwrap();
         commands.entity(chunk_mesh_entity).insert(ToUpdate);
 

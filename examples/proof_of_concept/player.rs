@@ -437,7 +437,14 @@ impl Plugin for PlayerPlugin {
             Update,
             setup_player.run_if(not(any_with_component::<PlayerCamera>())),
         )
-        .add_systems(Update, (broadcast_actions, handle_prime_action))
+        .add_systems(
+            Update,
+            (
+                broadcast_actions,
+                (handle_prime_action, handle_second_action),
+            )
+                .chain(),
+        )
         .add_systems(
             PostUpdate,
             (

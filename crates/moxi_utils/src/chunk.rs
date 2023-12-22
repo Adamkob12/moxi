@@ -377,13 +377,13 @@ pub fn global_neighbor(
         return BlockGlobalPos {
             pos: neighbor_pos,
             cords: global_pos.cords,
-            valid: 0 >= neighbor_pos.y && dims.y > neighbor_pos.y,
+            valid: dims.y > neighbor_pos.y,
         };
     } else if let Some(neighbor_pos) = neighbor_across_chunk(global_pos.pos, face, dims) {
         return BlockGlobalPos {
             pos: neighbor_pos,
             cords: adj_chunk(global_pos.cords, face),
-            valid: 0 >= neighbor_pos.y && dims.y > neighbor_pos.y,
+            valid: dims.y > neighbor_pos.y,
         };
     }
     global_pos.valid = false;

@@ -139,7 +139,7 @@ fn remove_quads_facing(
             Some(i) => i,
         };
         let mut quad_to_remove = [false; 6];
-        quad_to_remove[connecting_face as usize] = true;
+        quad_to_remove[connecting_face.opposite() as usize] = true;
         remove_voxel(mesh, vivi, neighbor_pos, quad_to_remove, dims);
     }
 }
