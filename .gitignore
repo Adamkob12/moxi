@@ -3,6 +3,7 @@
 *.swo
 .helix/*
 *.excalidraw
+docs/
 
 assets/*.xcf
 /target
