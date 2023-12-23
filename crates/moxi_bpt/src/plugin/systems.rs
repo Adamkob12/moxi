@@ -57,11 +57,45 @@ unsafe impl SystemParam for WrapperWorldCell<'_> {
     }
 }
 
+#[derive(Event, Clone, Copy)]
+pub(crate) struct InBetweenerEvent(pub(crate) BlockWorldUpdateEvent);
+
 pub(crate) fn handle_world_block_update<const N: usize>(
     mut world_block_update_events: EventReader<BlockWorldUpdateEvent>,
+    mut inbetweener_event_sender: EventWriter<InBetweenerEvent>,
     mut block_action_runner: BlockActionRunner,
+    blocks: Blocks<N>,
 ) {
     for event in world_block_update_events.read() {
-        block_action_runner.execute_all_block_actions(event.block_id, *event);
+        let block_id_at_pos = blocks.block_id_at(event.chunk_cords, event.block_pos);
+        block_action_runner.execute_all_block_actions(block_id_at_pos, *event);
+        inbetweener_event_sender.send(InBetweenerEvent(*event));
+    }
+}
+
+pub(crate) fn send_world_block_updates_to_surrounding_blocks<const N: usize>(
+    mut world_block_update_event_sender: EventWriter<BlockWorldUpdateEvent>,
+    mut inbetweener_events: EventReader<InBetweenerEvent>,
+    blocks: Blocks<N>,
+) {
+    for event in inbetweener_events.read() {
+        let block_update = match event.0.block_update {
+            BlockUpdate::Pure(block_update) => block_update,
+            BlockUpdate::Reaction(_, _) => {
+                continue;
+            }
+        };
+        let surrounding_blocks =
+            blocks.get_global_surrounding_blocks(event.0.chunk_cords, event.0.block_pos);
+        surrounding_blocks
+            .iter()
+            .filter_map(|x| *x)
+            .for_each(|(face, cc, bp, id)| {
+                world_block_update_event_sender.send(BlockWorldUpdateEvent {
+                    block_pos: bp,
+                    chunk_cords: cc,
+                    block_update: BlockUpdate::Reaction(face.opposite(), block_update),
+                })
+            });
     }
 }

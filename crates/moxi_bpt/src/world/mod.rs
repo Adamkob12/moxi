@@ -10,7 +10,9 @@ pub use update_event::*;
 mod tests {
     use super::blockworld::*;
     use crate::blockreg::meshreg::MeshReg;
+    use bevy_asset::{AssetPlugin, Assets};
     use bevy_ecs::prelude::*;
+    use bevy_render::mesh::Mesh;
     use defs::*;
     use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
 
@@ -111,8 +113,10 @@ mod tests {
     /// Test adding multiple blocks and small test of the mesh registry
     #[test]
     fn test_blockworld3() {
-        let mut world = World::default();
+        let mut app = bevy_app::App::new();
+        let world = &mut app.world;
 
+        world.init_resource::<Assets<Mesh>>();
         world
             .init_block::<Block1>()
             .with_static_properties(())

@@ -1,10 +1,14 @@
-use crate::{player::RigidLayer, CHUNK_DIMS};
+use crate::{
+    player::{PhysicalPlayer, PlayerCamera, RigidLayer},
+    CHUNK_DIMS,
+};
 
 use super::BLOCKS_IN_CHUNK;
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{
-    CoefficientCombine, Collider, CollisionLayers, Friction, GravityScale, LockedAxes,
-    MassPropertiesBundle, Restitution, RigidBody, ShapeCaster, ShapeHits, SpatialQueryFilter,
+    CoefficientCombine, Collider, CollisionLayers, Friction, GravityScale, LinearVelocity,
+    LockedAxes, MassPropertiesBundle, Restitution, RigidBody, ShapeCaster, ShapeHits,
+    SpatialQueryFilter,
 };
 use moxi_bpt::prelude::{app::MoxiApp, *};
 use moxi_mesh_utils::prelude::*;
@@ -18,6 +22,7 @@ const VOXEL_CENTER: [f32; 3] = [0.0, 0.0, 0.0];
 const PADDING: f32 = 1.0 / 16.0;
 const DEFAULT_COLOR_INTENSITY: f32 = 1.0;
 const ALPHA: f32 = 1.0;
+const PLAYER_STEPPED_ON_BLOCK: BlockUpdateType = BlockUpdateType::from_u128(12);
 
 pub struct BlocksPlugin;
 
@@ -25,11 +30,15 @@ impl Plugin for BlocksPlugin {
     fn build(&self, app: &mut App) {
         app.init_block::<Grass>()
             .with_block_actions(trigger_if_block_above_isnt_air, (), transform_into::<Dirt>)
+            .with_block_actions(trigger_player_step_on, (), transform_into::<Stone>)
             .init_block::<Dirt>()
             .init_block::<Stone>()
             .init_block::<Sand>()
             .with_block_actions(trigger_falling_block, (), spawn_falling_block);
-        app.add_systems(PreUpdate, follow_falling_block);
+        app.add_systems(
+            PreUpdate,
+            (follow_falling_block, check_if_player_stepped_on_block),
+        );
     }
 }
 
@@ -47,6 +56,13 @@ fn trigger_if_block_above_isnt_air(
     blocks.block_name_at(chunk_cords, block_above_pos) != "Air"
 }
 
+fn trigger_player_step_on(block_world_update: In<BlockWorldUpdateEvent>) -> bool {
+    block_world_update
+        .0
+        .block_update
+        .is_pure_and(|block_update| block_update == PLAYER_STEPPED_ON_BLOCK)
+}
+
 fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: BlocksX) -> bool {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
@@ -55,7 +71,7 @@ fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: 
     blocks.block_name_at(chunk_cords, block_below_pos) == "Air"
         && !matches!(
             block_world_update.0.block_update,
-            BlockUpdate::Pure(BlockUpdateType::BlockRemoved)
+            BlockUpdate::Pure(BLOCK_REMOVED)
         )
 }
 
@@ -94,6 +110,24 @@ fn follow_falling_block(
                 blocks.set_block_at_name(cords, pos, "Sand");
                 commands.entity(entity).despawn();
             }
+        }
+    }
+}
+
+fn check_if_player_stepped_on_block(
+    mut block_world_update_events: EventWriter<BlockWorldUpdateEvent>,
+    player_pos: Query<&GlobalTransform, (With<PhysicalPlayer>, Changed<LinearVelocity>)>,
+) {
+    if let Ok(&global_transform) = player_pos.get_single() {
+        let BlockGlobalPos { pos, cords, valid } =
+            point_to_global_block_pos(global_transform.translation() - Vec3::Y * 1.3, CHUNK_DIMS);
+        if valid {
+            println!("sent");
+            block_world_update_events.send(BlockWorldUpdateEvent {
+                block_pos: pos,
+                chunk_cords: cords,
+                block_update: BlockUpdate::Pure(PLAYER_STEPPED_ON_BLOCK),
+            });
         }
     }
 }

@@ -3,11 +3,14 @@ mod systems;
 
 use self::{
     app::MoxiApp,
-    systems::{apply_deferred_for_all_actions, handle_world_block_update},
+    systems::{
+        apply_deferred_for_all_actions, handle_world_block_update,
+        send_world_block_updates_to_surrounding_blocks, InBetweenerEvent,
+    },
 };
 use crate::*;
 pub use app::*;
-use bevy_app::{Last, Plugin, PostUpdate, PreUpdate, Update};
+use bevy_app::{Plugin, PreUpdate};
 use blockworld::{global_block_breaker, global_block_placer, GlobalBlockBreak, GlobalBlockPlace};
 use chunk::ChunkPlugin;
 use prelude::Block;
@@ -29,7 +32,8 @@ impl<const N: usize> Plugin for MoxiBptPlugin<N> {
         app.add_plugins(ChunkPlugin::<N>);
         app.add_event::<BlockWorldUpdateEvent>()
             .add_event::<GlobalBlockBreak>()
-            .add_event::<GlobalBlockPlace>();
+            .add_event::<GlobalBlockPlace>()
+            .add_event::<InBetweenerEvent>();
 
         app.init_block::<Air>();
         app.add_systems(
@@ -38,6 +42,7 @@ impl<const N: usize> Plugin for MoxiBptPlugin<N> {
                 global_block_breaker::<N>,
                 global_block_placer::<N>,
                 handle_world_block_update::<N>,
+                send_world_block_updates_to_surrounding_blocks::<N>,
                 apply_deferred_for_all_actions,
                 apply_deferred,
             )

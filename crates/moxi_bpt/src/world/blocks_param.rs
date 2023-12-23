@@ -41,9 +41,7 @@ impl<'w, 's, const N: usize> BlocksMut<'w, 's, N> {
         block_id: BlockId,
     ) {
         let current_block = self.get_block_id_at(chunk_cords, block_pos).unwrap_or(0);
-        if current_block == block_id {
-            return;
-        }
+
         if current_block != 0 {
             self.global_block_break_sender.send(GlobalBlockBreak {
                 chunk_cords,
@@ -112,15 +110,19 @@ impl<'w, 's, const N: usize> Blocks<'w, 's, N> {
         chunk_cords: ChunkCords,
         block_pos: BlockPos,
     ) -> SurroundingBlocks<(Face, ChunkCords, BlockPos, BlockId)> {
-        let chunk = self.chunk_map.get_chunk(chunk_cords).unwrap();
-        let chunk = self.chunks_query.get(chunk).unwrap().0;
+        let default = SurroundingBlocks::default();
+        let chunk_entity = self.chunk_map.get_chunk(chunk_cords);
+        if chunk_entity.is_none() {
+            return default;
+        }
+        let chunk_grid = self.chunks_query.get(chunk_entity.unwrap()).unwrap().0;
         let global_block_pos = BlockGlobalPos::new(block_pos, chunk_cords);
         global_enumerate_neighboring_blocks(global_block_pos, Self::PLACEHOLDER_DIMS)
             .map(|(face, gbp)| {
                 let neighbor_chunk_cords = gbp.cords;
                 let neighbor_block_pos = gbp.pos;
                 if neighbor_chunk_cords == chunk_cords {
-                    chunk
+                    chunk_grid
                         .0
                         .get_block(neighbor_block_pos)
                         .map(|id| (face, neighbor_chunk_cords, neighbor_block_pos, id))

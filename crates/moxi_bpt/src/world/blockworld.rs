@@ -211,8 +211,12 @@ impl<'w> BlockWorldMut<'w> {
 
             (trigger_entity, action_entities)
         };
-        self.block_world_mut
-            .insert(BlockActions(vec![(trigger_entity, action_entities)]));
+        if let Some(mut block_actions_comp) = self.block_world_mut.get_mut::<BlockActions>() {
+            block_actions_comp.0.push((trigger_entity, action_entities));
+        } else {
+            self.block_world_mut
+                .insert(BlockActions(vec![(trigger_entity, action_entities)]));
+        }
         self
     }
 }
@@ -306,25 +310,10 @@ pub(crate) fn global_block_placer<const N: usize>(
         );
 
         block_world_update_sender.send(BlockWorldUpdateEvent {
-            block_id,
             block_pos,
             chunk_cords,
-            block_update: BlockUpdate::Pure(BlockUpdateType::BlockPlaced),
+            block_update: BlockUpdate::Pure(BLOCK_PLACED),
         });
-        surrounding_blocks
-            .iter()
-            .filter_map(|x| *x)
-            .for_each(|(face, cc, bp, id)| {
-                block_world_update_sender.send(BlockWorldUpdateEvent {
-                    block_id: id,
-                    block_pos: bp,
-                    chunk_cords: cc,
-                    block_update: BlockUpdate::Reaction(
-                        face.opposite(),
-                        BlockUpdateType::BlockPlaced,
-                    ),
-                })
-            });
     }
 }
 
@@ -391,24 +380,9 @@ pub(crate) fn global_block_breaker<const N: usize>(
         //
 
         block_world_update_sender.send(BlockWorldUpdateEvent {
-            block_id,
             block_pos,
             chunk_cords,
-            block_update: BlockUpdate::Pure(BlockUpdateType::BlockRemoved),
+            block_update: BlockUpdate::Pure(BLOCK_REMOVED),
         });
-        surrounding_blocks
-            .iter()
-            .filter_map(|x| *x)
-            .for_each(|(face, cc, bp, id)| {
-                block_world_update_sender.send(BlockWorldUpdateEvent {
-                    block_id: id,
-                    block_pos: bp,
-                    chunk_cords: cc,
-                    block_update: BlockUpdate::Reaction(
-                        face.opposite(),
-                        BlockUpdateType::BlockRemoved,
-                    ),
-                })
-            });
     }
 }
