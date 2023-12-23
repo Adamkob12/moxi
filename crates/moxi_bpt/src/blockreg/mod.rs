@@ -1,5 +1,6 @@
 pub(crate) mod meshreg;
 use bevy_ecs::prelude::Resource;
+pub use meshreg::*;
 use std::collections::HashSet;
 
 #[derive(Resource, Default)]

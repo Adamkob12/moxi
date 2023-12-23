@@ -93,7 +93,7 @@ pub fn handle_second_action(
             blocks.set_block_at_name(
                 global_block_to_place_pos.cords,
                 global_block_to_place_pos.pos,
-                "Stone",
+                "Sand",
             );
         }
     }

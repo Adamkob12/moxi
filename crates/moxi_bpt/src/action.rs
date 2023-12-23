@@ -13,6 +13,30 @@ pub trait IntoAction<In, M>: IntoSystem<In, (), M> {
 }
 
 impl Action {
+    pub unsafe fn apply_deferred_unsafe<'w>(&mut self, world: UnsafeWorldCell<'w>) {
+        match self {
+            Action::Input(init, sys) if *init => {
+                sys.apply_deferred(world.world_mut());
+            }
+            Action::No(init, sys) if *init => {
+                sys.apply_deferred(world.world_mut());
+            }
+            _ => {}
+        }
+    }
+
+    pub fn apply_deferred<'w>(&mut self, world: &'w mut World) {
+        match self {
+            Action::Input(init, sys) if *init => {
+                sys.apply_deferred(world);
+            }
+            Action::No(init, sys) if *init => {
+                sys.apply_deferred(world);
+            }
+            _ => {}
+        }
+    }
+
     pub fn run(&mut self, input: Option<BlockWorldUpdateEvent>, world: &mut World) {
         match self {
             Action::Input(initialized, sys) => {
@@ -51,7 +75,7 @@ impl Action {
                 sys.run_unsafe(
                     input.expect("Expected valid input to evaluate Trigger"),
                     world,
-                )
+                );
             }
             Action::No(initialized, sys) => {
                 if !*initialized {
@@ -60,7 +84,7 @@ impl Action {
                         sys.initialize(world.world_mut());
                     }
                 }
-                sys.run_unsafe((), world)
+                sys.run_unsafe((), world);
             }
         }
     }

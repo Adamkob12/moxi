@@ -1,3 +1,5 @@
+use bevy_asset::Handle;
+
 use crate::{
     block_mesh::{BlockMeshRef, BlockMeshType},
     *,
@@ -11,7 +13,7 @@ pub trait MeshRegistry<B: BlockInGrid> {
     fn get_block_mesh_ref(&self, block: &B) -> BlockMeshRef;
 
     /// Returns the [`AssetId`] of the block's mesh.
-    fn get_block_mesh_asset_id(&self, block: &B) -> AssetId<Mesh>;
+    fn get_block_mesh_handle(&self, block: &B) -> Handle<Mesh>;
 
     /// Return the [`BlockMeshType`] of the block mesh.
     fn get_block_mesh_type(&self, block: &B) -> BlockMeshType;

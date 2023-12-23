@@ -71,6 +71,13 @@ impl Face {
             Face::Front => Face::Back,
         }
     }
+
+    pub fn is_vertical(&self) -> bool {
+        match *self {
+            Face::Top | Face::Bottom => true,
+            _ => false,
+        }
+    }
 }
 
 impl Into<usize> for Face {

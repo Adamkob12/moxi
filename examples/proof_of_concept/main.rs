@@ -4,8 +4,7 @@ mod player;
 
 use bevy::{prelude::*, render::primitives::Aabb, window::WindowResolution};
 use bevy_xpbd_3d::prelude::{
-    AsyncCollider, Collider, CollisionLayers, ComputedCollider, PhysicsPlugins, RigidBody,
-    TriMeshFlags,
+    AsyncCollider, CollisionLayers, ComputedCollider, PhysicsPlugins, RigidBody, TriMeshFlags,
 };
 pub use blocks::*;
 use chunks::ChunksPlugin;
@@ -18,8 +17,14 @@ pub(crate) const LENGTH: u32 = 16;
 pub(crate) const CHUNK_DIMS: Dimensions = Dimensions::new(WIDTH, HEIGHT, LENGTH);
 pub(crate) const BLOCKS_IN_CHUNK: usize =
     CHUNK_DIMS.x as usize * CHUNK_DIMS.y as usize * CHUNK_DIMS.z as usize;
+// use bevy_mod_debugdump::schedule_graph::{settings::Style, Settings};
+// use std::path::PathBuf;
+// use bevy::ecs::schedule::ScheduleLabel;
+//
+// #[derive(ScheduleLabel, Clone, Debug, PartialEq, Eq, Hash)]
+// struct ScheduleDebugGroup;
 
-fn main() {
+fn main() -> Result<(), std::io::Error> {
     let mut app = App::new();
 
     app.add_plugins((
@@ -46,15 +51,17 @@ fn main() {
         brightness: 0.8,
     });
 
-    app.add_systems(Update, insert_collider_for_chunks);
+    app.add_systems(PostUpdate, insert_collider_for_chunks);
 
     app.run();
+
+    Ok(())
 }
 
 // Will be depracated when built in physics is introduced
 fn insert_collider_for_chunks(
     mut commands: Commands,
-    mesh_chunks_query: Query<Entity, Or<((Without<Collider>, With<MeshChunk>), Changed<Aabb>)>>,
+    mesh_chunks_query: Query<Entity, (Changed<Aabb>, With<MeshChunk>)>,
 ) {
     for mesh_chunk_entity in mesh_chunks_query.iter() {
         commands

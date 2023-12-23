@@ -20,6 +20,18 @@ impl<'w, 's> BlockActionRunner<'w, 's> {
         let block_actions = self.block_actions.get(*block_entity).unwrap();
         block_actions.execute_all_unsafe(self.unsafe_world_cell.0, Some(block_world_update_event));
     }
+
+    pub unsafe fn apply_deferred(&mut self) {
+        for block_actions in self.block_actions.iter() {
+            block_actions.apply_deferred_all(self.unsafe_world_cell.0);
+        }
+    }
+}
+
+pub fn apply_deferred_for_all_actions(mut block_action_runner: BlockActionRunner) {
+    unsafe {
+        block_action_runner.apply_deferred();
+    }
 }
 
 pub struct WrapperWorldCell<'w>(UnsafeWorldCell<'w>);

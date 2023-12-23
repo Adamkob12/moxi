@@ -201,6 +201,7 @@ pub enum RigidLayer {
     Spectator,
     Ground,
     GroundNonCollidable,
+    FallingBlock,
 }
 
 impl PlayerGameMode {
@@ -438,7 +439,7 @@ impl Plugin for PlayerPlugin {
             setup_player.run_if(not(any_with_component::<PlayerCamera>())),
         )
         .add_systems(
-            Update,
+            PreUpdate,
             (
                 broadcast_actions,
                 (handle_prime_action, handle_second_action),

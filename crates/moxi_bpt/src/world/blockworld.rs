@@ -2,15 +2,17 @@ use crate::blockreg::meshreg::MeshReg;
 use crate::prelude::Trigger;
 use crate::*;
 use action::{Action, IntoActionSet};
+use bevy_asset::{AssetId, Assets, Handle};
 use bevy_ecs::world::unsafe_world_cell::UnsafeWorldCell;
+use bevy_render::mesh::Mesh;
 use chunk::components::ToUpdate;
 use chunk::meshmd::ChunkMeshMd;
 use lazy_static::lazy_static;
 use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
 use moxi_mesh_utils::BlockMeshChange;
 use moxi_utils::prelude::{
-    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords, NDir,
-    SurroundingBlocks, SurroundingBlocksCommon, FACES,
+    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords, Face,
+    NDir, SurroundingBlocks, SurroundingBlocksCommon, FACES,
 };
 use prelude::{Block, BlockRegistry, CommonActionSet, IntoTrigger};
 use std::any::TypeId;
@@ -125,6 +127,15 @@ impl BlockActions {
             }
         }
     }
+
+    pub unsafe fn apply_deferred_all(&self, world: UnsafeWorldCell) {
+        for (_, action_entities) in self.0.iter() {
+            for action_entity in action_entities.iter() {
+                let mut action = world.world_mut().get_mut::<Action>(*action_entity).unwrap();
+                action.apply_deferred_unsafe(world);
+            }
+        }
+    }
 }
 
 pub struct BlockWorldMut<'w> {
@@ -230,7 +241,16 @@ impl BlockInitiallizerTrait for World {
         NAME_2_ID.lock().unwrap().insert(block_name, block_id);
         ID_2_NAME.lock().unwrap().insert(block_id, block_name);
 
-        self.resource_mut::<MeshReg>().meshes.push(B::get_mesh());
+        let block_mesh = B::get_mesh();
+        let handle = block_mesh
+            .clone()
+            .as_option()
+            .map_or(Handle::default(), |mesh| {
+                self.resource_mut::<Assets<Mesh>>().add(mesh)
+            });
+        let mut mesh_reg = self.resource_mut::<MeshReg>();
+        mesh_reg.meshes.push(block_mesh);
+        mesh_reg.handles.push(handle);
 
         unsafe {
             let tmp_mut_ptr = self as *mut World;
@@ -342,7 +362,7 @@ pub(crate) fn global_block_breaker<const N: usize>(
         );
 
         if matches!(mesh_type, BlockMeshType::Cube) {
-            for face in FACES {
+            for face in FACES.into_iter().filter(|face| !face.is_vertical()) {
                 if is_block_pos_on_edge(block_pos, face, dims) {
                     let adj_chunk_cords = chunk_cords + to_cords(Some(NDir::from(face)));
                     let neighbor_block_pos = neighbor_across_chunk(block_pos, face, dims).unwrap();
@@ -374,7 +394,7 @@ pub(crate) fn global_block_breaker<const N: usize>(
             block_id,
             block_pos,
             chunk_cords,
-            block_update: BlockUpdate::Pure(BlockUpdateType::BlockPlaced),
+            block_update: BlockUpdate::Pure(BlockUpdateType::BlockRemoved),
         });
         surrounding_blocks
             .iter()
@@ -386,7 +406,7 @@ pub(crate) fn global_block_breaker<const N: usize>(
                     chunk_cords: cc,
                     block_update: BlockUpdate::Reaction(
                         face.opposite(),
-                        BlockUpdateType::BlockPlaced,
+                        BlockUpdateType::BlockRemoved,
                     ),
                 })
             });
