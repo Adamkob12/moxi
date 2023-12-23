@@ -4,6 +4,7 @@
 .helix/*
 *.excalidraw
 docs/
+visuals/
 
 assets/*.xcf
 /target
