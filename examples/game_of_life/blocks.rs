@@ -71,8 +71,7 @@ fn trigger_death(block_update: In<BlockWorldUpdateEvent>, blocks: BlocksX) -> bo
     let chunk_cords = block_update.0.chunk_cords;
 
     let tmp = get_neighbors_count(block_pos, chunk_cords, blocks);
-    println!("{} to kill", tmp);
-    !(tmp < 4 && tmp > 1)
+    !(tmp < 3 && tmp > 1)
 }
 
 fn trigger_birth(block_update: In<BlockWorldUpdateEvent>, blocks: BlocksX) -> bool {
@@ -80,8 +79,7 @@ fn trigger_birth(block_update: In<BlockWorldUpdateEvent>, blocks: BlocksX) -> bo
     let chunk_cords = block_update.0.chunk_cords;
 
     let tmp = get_neighbors_count(block_pos, chunk_cords, blocks);
-    println!("{} to give birth", tmp);
-    tmp == 3
+    tmp == 2
 }
 
 fn death(block_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksMutX, pause: Res<Pause>) {

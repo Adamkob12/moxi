@@ -42,6 +42,7 @@ bevy = "0.12"
 bevy_flycam = "*"
 bevy_xpbd_3d = { git = "https://github.com/Adamkob12/bevy_xpbd.git" }
 bevy_mod_debugdump = "0.9"
+bevy_framepace = "0.14"
 
 
 [features]

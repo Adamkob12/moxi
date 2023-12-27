@@ -3,6 +3,7 @@ mod chunks;
 mod player;
 
 use bevy::{prelude::*, render::primitives::Aabb, window::WindowResolution};
+use bevy_framepace::{FramepaceSettings, Limiter};
 use bevy_xpbd_3d::prelude::{
     AsyncCollider, CollisionLayers, ComputedCollider, PhysicsPlugins, RigidBody, TriMeshFlags,
 };
@@ -39,6 +40,7 @@ fn main() -> Result<(), std::io::Error> {
                 }),
                 ..Default::default()
             }),
+        bevy_framepace::FramepacePlugin,
         MoxiBptPlugin::<BLOCKS_IN_CHUNK>,
         BlocksPlugin,
         PlayerPlugin,
@@ -51,11 +53,28 @@ fn main() -> Result<(), std::io::Error> {
         brightness: 0.8,
     });
 
-    app.add_systems(PostUpdate, insert_collider_for_chunks);
+    app.add_systems(
+        PostUpdate,
+        (
+            insert_collider_for_chunks,
+            change_fps_cap_when_game_is_running.run_if(resource_changed::<Pause>()),
+        ),
+    );
 
     app.run();
 
     Ok(())
+}
+
+fn change_fps_cap_when_game_is_running(
+    mut framepace_settings: ResMut<FramepaceSettings>,
+    pause: Res<Pause>,
+) {
+    if pause.0 {
+        framepace_settings.limiter = Limiter::Auto;
+    } else {
+        framepace_settings.limiter = Limiter::from_framerate(10.0);
+    }
 }
 
 // Will be depracated when built in physics is introduced

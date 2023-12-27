@@ -90,7 +90,7 @@ pub(crate) fn send_world_block_updates_to_surrounding_blocks<const N: usize>(
         surrounding_blocks
             .iter()
             .filter_map(|x| *x)
-            .for_each(|(face, cc, bp, id)| {
+            .for_each(|(face, cc, bp, _)| {
                 world_block_update_event_sender.send(BlockWorldUpdateEvent {
                     block_pos: bp,
                     chunk_cords: cc,

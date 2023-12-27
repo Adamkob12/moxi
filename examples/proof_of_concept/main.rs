@@ -35,6 +35,7 @@ fn main() -> Result<(), std::io::Error> {
                     resizable: false,
                     mode: bevy::window::WindowMode::Windowed,
                     resolution: WindowResolution::new(1400.0, 900.0),
+
                     ..Default::default()
                 }),
                 ..Default::default()

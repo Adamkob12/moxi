@@ -10,7 +10,7 @@ pub use update_event::*;
 mod tests {
     use super::blockworld::*;
     use crate::blockreg::meshreg::MeshReg;
-    use bevy_asset::{AssetPlugin, Assets};
+    use bevy_asset::Assets;
     use bevy_ecs::prelude::*;
     use bevy_render::mesh::Mesh;
     use defs::*;

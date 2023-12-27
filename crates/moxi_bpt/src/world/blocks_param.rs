@@ -12,10 +12,10 @@ use moxi_utils::prelude::{
 
 #[derive(SystemParam)]
 pub struct Blocks<'w, 's, const N: usize> {
-    blocks_query: Query<'w, 's, (&'static BlockMarker, &'static BlockName)>,
+    _blocks_query: Query<'w, 's, (&'static BlockMarker, &'static BlockName)>,
     pub(crate) chunk_map: Res<'w, ChunkMap>,
     pub(crate) chunks_query: Query<'w, 's, (&'static mut ChunkGrid<N>, &'static ChildMeshChunks)>,
-    block_id_to_ent: Res<'w, BlockIdtoEnt>,
+    _block_id_to_ent: Res<'w, BlockIdtoEnt>,
 }
 
 #[derive(SystemParam)]

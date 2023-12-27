@@ -2,7 +2,7 @@ use crate::blockreg::meshreg::MeshReg;
 use crate::prelude::Trigger;
 use crate::*;
 use action::{Action, IntoActionSet};
-use bevy_asset::{AssetId, Assets, Handle};
+use bevy_asset::{Assets, Handle};
 use bevy_ecs::world::unsafe_world_cell::UnsafeWorldCell;
 use bevy_render::mesh::Mesh;
 use chunk::components::ToUpdate;
@@ -11,8 +11,8 @@ use lazy_static::lazy_static;
 use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
 use moxi_mesh_utils::BlockMeshChange;
 use moxi_utils::prelude::{
-    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords, Face,
-    NDir, SurroundingBlocks, SurroundingBlocksCommon, FACES,
+    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords, NDir,
+    SurroundingBlocks, SurroundingBlocksCommon, FACES,
 };
 use prelude::{Block, BlockRegistry, CommonActionSet, IntoTrigger};
 use std::any::TypeId;
@@ -87,7 +87,7 @@ pub trait BlockInitiallizerTrait {
 }
 
 impl BlockActions {
-    pub fn execute_all(&self, world: &mut World, input: Option<BlockWorldUpdateEvent>) {
+    pub fn _execute_all(&self, world: &mut World, input: Option<BlockWorldUpdateEvent>) {
         let world = world.as_unsafe_world_cell();
         for (trigger_entity, action_entities) in self.0.iter() {
             unsafe {
