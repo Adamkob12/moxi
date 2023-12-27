@@ -1,1 +1,1 @@
-## Moxi- Minecraft, Oxidized
+## Moxi- Minecraft (style game development), Oxidized
