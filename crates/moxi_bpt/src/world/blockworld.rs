@@ -281,7 +281,7 @@ impl BlockInitiallizerTrait for World {
 
 pub(crate) fn global_block_placer<const N: usize>(
     mut block_place_events: EventReader<GlobalBlockPlace>,
-    mut blocks: Blocks<N>,
+    mut blocks: _Blocks<N>,
     mut commands: Commands,
     mut chunk_meshes_query: Query<&mut ChunkMeshMd>,
     mesh_registry: Res<MeshReg>,
@@ -319,7 +319,7 @@ pub(crate) fn global_block_placer<const N: usize>(
 
 pub(crate) fn global_block_breaker<const N: usize>(
     mut block_break_events: EventReader<GlobalBlockBreak>,
-    mut blocks: Blocks<N>,
+    mut blocks: _Blocks<N>,
     mesh_registry: Res<MeshReg>,
     mut block_world_update_sender: EventWriter<BlockWorldUpdateEvent>,
     mut commands: Commands,

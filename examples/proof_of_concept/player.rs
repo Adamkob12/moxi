@@ -3,6 +3,7 @@ mod controller;
 mod misc_systems;
 
 use misc_systems::*;
+use moxi_physics::MoxiCollisionLayer;
 use std::f32::consts::PI;
 
 use self::action::*;
@@ -105,13 +106,13 @@ pub const PLAYER_GRAVITY_SCALE: GravityScale = GravityScale(3.5);
 /// Flymode gravity scale
 pub const FLYMODE_GRAVITY_SCALE: GravityScale = GravityScale(0.0);
 /// Default player collision groups
-pub const PLAYER_GROUPS: &[RigidLayer] = &[RigidLayer::Player];
+pub const PLAYER_GROUPS: &[MoxiCollisionLayer] = &[MoxiCollisionLayer::Player];
 /// Default player collision masks
-pub const PLAYER_MASKS: &[RigidLayer] = &[RigidLayer::Ground];
+pub const PLAYER_MASKS: &[MoxiCollisionLayer] = &[MoxiCollisionLayer::Terrain];
 /// Default collision groups in spectator mode
-pub const SPECTATOR_GROUPS: &[RigidLayer] = &[RigidLayer::Spectator];
+pub const SPECTATOR_GROUPS: &[MoxiCollisionLayer] = &[MoxiCollisionLayer::Terrain];
 /// Default collision masks in spectator mode
-pub const SPECTATOR_MASKS: &[RigidLayer] = &[];
+pub const SPECTATOR_MASKS: &[MoxiCollisionLayer] = &[];
 /// Build player collider
 pub fn build_player_collider() -> Collider {
     Collider::capsule(PLAYER_COLLIDER_HEIGHT, PLAYER_COLLIDER_RADIUS)
@@ -194,15 +195,6 @@ pub struct MovementSettings {
 /// out specific colliders. For example, the players shouldn't collide with grass, so we might
 /// filter out the grasses [`PhysicsLayer`] when setting up the [`player's collider`](Collider), but we still want the
 /// player to be able to break grass, so we will include its [`PhysicsLayer`] in the [`RayCaster`].
-#[repr(C)]
-#[derive(PhysicsLayer, Copy, Clone)]
-pub enum RigidLayer {
-    Player,
-    Spectator,
-    Ground,
-    GroundNonCollidable,
-    FallingBlock,
-}
 
 impl PlayerGameMode {
     pub fn can_fly(&self) -> bool {
@@ -376,8 +368,7 @@ fn update_target_block(
             forward,
             MAX_INTERACTION_DISTANCE,
             false,
-            SpatialQueryFilter::new()
-                .with_masks([RigidLayer::Ground, RigidLayer::GroundNonCollidable]),
+            SpatialQueryFilter::new().with_masks(&[MoxiCollisionLayer::Terrain]),
         ) {
             let face = {
                 let mut to_return = None;

@@ -57,7 +57,7 @@ pub fn broadcast_actions(
 }
 
 pub fn handle_prime_action(
-    mut blocks: BlocksMutX,
+    mut blocks: BlocksMut,
     target_block: Res<TargetBlock>,
     mut primary_actions: EventReader<PrimeAction>,
 ) {
@@ -72,7 +72,7 @@ pub fn handle_prime_action(
 }
 
 pub fn handle_second_action(
-    mut blocks: BlocksMutX,
+    mut blocks: BlocksMut,
     target_block: Res<TargetBlock>,
     mut secondary_actions: EventReader<SecondAction>,
 ) {

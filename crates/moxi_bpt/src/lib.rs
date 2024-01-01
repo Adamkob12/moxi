@@ -6,6 +6,7 @@ pub(crate) mod block_action;
 pub(crate) mod blockreg;
 pub(crate) mod chunk;
 pub(crate) mod plugin;
+pub(crate) mod this_block;
 pub(crate) mod trigger;
 pub(crate) mod world;
 

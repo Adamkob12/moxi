@@ -1,8 +1,5 @@
 use super::BLOCKS_IN_CHUNK;
-use crate::{
-    player::{PhysicalPlayer, RigidLayer},
-    CHUNK_DIMS,
-};
+use crate::{player::PhysicalPlayer, CHUNK_DIMS};
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{
     CoefficientCombine, Collider, CollisionLayers, Friction, GravityScale, LinearVelocity,
@@ -11,12 +8,13 @@ use bevy_xpbd_3d::prelude::{
 };
 use moxi_bpt::prelude::{app::MoxiApp, *};
 use moxi_mesh_utils::prelude::*;
+use moxi_physics::MoxiCollisionLayer;
 use moxi_utils::prelude::{
     global_block_pos_to_block_trans, point_to_global_block_pos, BlockGlobalPos, BlockPos, Face,
 };
 
-pub type BlocksX<'w, 's> = Blocks<'w, 's, BLOCKS_IN_CHUNK>;
-pub type BlocksMutX<'w, 's> = BlocksMut<'w, 's, BLOCKS_IN_CHUNK>;
+pub type Blocks<'w, 's> = _Blocks<'w, 's, BLOCKS_IN_CHUNK>;
+pub type BlocksMut<'w, 's> = _BlocksMut<'w, 's, BLOCKS_IN_CHUNK>;
 
 const VOXEL_DIMS: [f32; 3] = [1.0, 1.0, 1.0];
 const TEXTURE_ATLAS_DIMS: [u32; 2] = [10, 10];
@@ -46,7 +44,7 @@ impl Plugin for BlocksPlugin {
 
 fn trigger_if_block_above_isnt_air(
     block_world_update: In<BlockWorldUpdateEvent>,
-    blocks: BlocksX,
+    blocks: Blocks,
 ) -> bool {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
@@ -65,7 +63,7 @@ fn trigger_if_player_stepped_on(block_world_update: In<BlockWorldUpdateEvent>) -
 fn spawn_falling_block(
     block_world_update: In<BlockWorldUpdateEvent>,
     mut commands: Commands,
-    mut blocks: BlocksMutX,
+    mut blocks: BlocksMut,
     mesh_registry: Res<MeshReg>,
     cube_mesh_material: Res<CubeMeshMaterial>,
 ) {
@@ -83,7 +81,7 @@ fn spawn_falling_block(
     ));
 }
 
-fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: BlocksX) -> bool {
+fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: Blocks) -> bool {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
     let mut block_below_pos = block_pos;
@@ -95,7 +93,7 @@ fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: 
         )
 }
 fn follow_falling_block(
-    mut blocks: BlocksMutX,
+    mut blocks: BlocksMut,
     mut commands: Commands,
     query: Query<(Entity, &FallingBlock, &ShapeHits, &Transform)>,
 ) {
@@ -129,7 +127,7 @@ fn check_if_player_stepped_on_block(
     }
 }
 
-fn transform_into<B: Block>(block_world_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksMutX) {
+fn transform_into<B: Block>(block_world_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksMut) {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
 
@@ -177,10 +175,12 @@ impl FallingBlockBundle {
             rigid_body: RigidBody::Dynamic,
             shape_caster: ShapeCaster::new(caster_shape, Vec3::ZERO, Quat::IDENTITY, Vec3::NEG_Y)
                 .with_max_time_of_impact(0.2)
-                .with_query_filter(SpatialQueryFilter::new().with_masks([RigidLayer::Ground])),
+                .with_query_filter(
+                    SpatialQueryFilter::new().with_masks([MoxiCollisionLayer::Terrain]),
+                ),
             collision_layers: CollisionLayers::new(
-                [RigidLayer::FallingBlock],
-                [RigidLayer::Ground],
+                [MoxiCollisionLayer::FreeBlock],
+                [MoxiCollisionLayer::Terrain],
             ),
             locked_axes: LockedAxes::ROTATION_LOCKED
                 .lock_translation_x()

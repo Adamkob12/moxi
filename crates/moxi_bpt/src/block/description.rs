@@ -1,3 +1,4 @@
+use bevy_ecs::prelude::Bundle;
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshType};
 
 pub trait Block {
@@ -6,6 +7,9 @@ pub trait Block {
     }
     fn get_mesh() -> BlockMesh {
         BlockMesh::Air
+    }
+    fn static_properties() -> impl Bundle {
+        ()
     }
 }
 

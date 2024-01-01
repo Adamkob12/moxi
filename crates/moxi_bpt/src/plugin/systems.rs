@@ -64,7 +64,7 @@ pub(crate) fn handle_world_block_update<const N: usize>(
     mut world_block_update_events: EventReader<BlockWorldUpdateEvent>,
     mut inbetweener_event_sender: EventWriter<InBetweenerEvent>,
     mut block_action_runner: BlockActionRunner,
-    blocks: Blocks<N>,
+    blocks: _Blocks<N>,
 ) {
     for event in world_block_update_events.read() {
         let block_id_at_pos = blocks.block_id_at(event.chunk_cords, event.block_pos);
@@ -76,7 +76,7 @@ pub(crate) fn handle_world_block_update<const N: usize>(
 pub(crate) fn send_world_block_updates_to_surrounding_blocks<const N: usize>(
     mut world_block_update_event_sender: EventWriter<BlockWorldUpdateEvent>,
     mut inbetweener_events: EventReader<InBetweenerEvent>,
-    blocks: Blocks<N>,
+    blocks: _Blocks<N>,
 ) {
     for event in inbetweener_events.read() {
         let block_update = match event.0.block_update {

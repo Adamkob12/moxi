@@ -11,7 +11,7 @@ use moxi_utils::prelude::{
 };
 
 #[derive(SystemParam)]
-pub struct Blocks<'w, 's, const N: usize> {
+pub struct _Blocks<'w, 's, const N: usize> {
     _blocks_query: Query<'w, 's, (&'static BlockMarker, &'static BlockName)>,
     pub(crate) chunk_map: Res<'w, ChunkMap>,
     pub(crate) chunks_query: Query<'w, 's, (&'static mut ChunkGrid<N>, &'static ChildMeshChunks)>,
@@ -19,21 +19,21 @@ pub struct Blocks<'w, 's, const N: usize> {
 }
 
 #[derive(SystemParam)]
-pub struct BlocksMut<'w, 's, const N: usize> {
-    blocks: Blocks<'w, 's, N>,
+pub struct _BlocksMut<'w, 's, const N: usize> {
+    blocks: _Blocks<'w, 's, N>,
     global_block_place_sender: EventWriter<'w, GlobalBlockPlace>,
     global_block_break_sender: EventWriter<'w, GlobalBlockBreak>,
 }
 
-impl<'w, 's, const N: usize> std::ops::Deref for BlocksMut<'w, 's, N> {
-    type Target = Blocks<'w, 's, N>;
+impl<'w, 's, const N: usize> std::ops::Deref for _BlocksMut<'w, 's, N> {
+    type Target = _Blocks<'w, 's, N>;
 
     fn deref(&self) -> &Self::Target {
         &self.blocks
     }
 }
 
-impl<'w, 's, const N: usize> BlocksMut<'w, 's, N> {
+impl<'w, 's, const N: usize> _BlocksMut<'w, 's, N> {
     pub fn set_block_at_id(
         &mut self,
         chunk_cords: ChunkCords,
@@ -69,7 +69,7 @@ impl<'w, 's, const N: usize> BlocksMut<'w, 's, N> {
     }
 }
 
-impl<'w, 's, const N: usize> Blocks<'w, 's, N> {
+impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
     pub fn get_block_name_at(
         &self,
         chunk_cords: ChunkCords,

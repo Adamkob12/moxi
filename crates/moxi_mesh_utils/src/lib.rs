@@ -48,4 +48,5 @@ pub mod prelude {
     pub use super::mesh_reg::*;
     pub use super::sl::*;
     pub use super::xsprite::*;
+    pub use bevy_render::primitives::Aabb;
 }

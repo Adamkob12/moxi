@@ -31,7 +31,7 @@ fn main() {
                 }),
                 ..Default::default()
             }),
-        MoxiBptPlugin::<BLOCKS_IN_CHUNK>,
+        _MoxiBptPlugin::<BLOCKS_IN_CHUNK>,
         BlocksPlugin,
         NoCameraPlayerPlugin,
         PlayerPlugin,
