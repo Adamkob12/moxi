@@ -67,7 +67,7 @@ pub(crate) fn handle_world_block_update<const N: usize>(
     blocks: _Blocks<N>,
 ) {
     for event in world_block_update_events.read() {
-        let block_id_at_pos = blocks.block_id_at(event.chunk_cords, event.block_pos);
+        let block_id_at_pos = blocks.block_id_at(event.chunk_cords(), event.block_pos());
         block_action_runner.execute_all_block_actions(block_id_at_pos, *event);
         inbetweener_event_sender.send(InBetweenerEvent(*event));
     }
@@ -79,14 +79,14 @@ pub(crate) fn send_world_block_updates_to_surrounding_blocks<const N: usize>(
     blocks: _Blocks<N>,
 ) {
     for event in inbetweener_events.read() {
-        let block_update = match event.0.block_update {
+        let block_update = match event.0.block_update() {
             BlockUpdate::Pure(block_update) => block_update,
             BlockUpdate::Reaction(_, _) => {
                 continue;
             }
         };
         let surrounding_blocks =
-            blocks.get_global_surrounding_blocks(event.0.chunk_cords, event.0.block_pos);
+            blocks.get_global_surrounding_blocks(event.0.chunk_cords(), event.0.block_pos());
         surrounding_blocks
             .iter()
             .filter_map(|x| *x)

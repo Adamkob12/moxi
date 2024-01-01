@@ -13,6 +13,7 @@ impl Plugin for ChunksPlugin {
     }
 }
 
+/// Setup the texture, similiar to the `chunks` example.
 fn setup_texture(
     mut commands: Commands,
     mut materials: ResMut<Assets<StandardMaterial>>,

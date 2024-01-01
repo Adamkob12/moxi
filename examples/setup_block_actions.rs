@@ -38,7 +38,7 @@ fn trigger1() -> bool {
 
 // Trigger that takes a `In<BlockWorldUpdateEvent>` as an input
 fn trigger2(block_world_update: In<BlockWorldUpdateEvent>) -> bool {
-    block_world_update.0.block_pos.x % 2 == 0
+    block_world_update.0.block_pos().x % 2 == 0
 }
 
 // Action that doesn't take any input, note actions are basically bevy systems,

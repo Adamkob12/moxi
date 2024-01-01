@@ -1,3 +1,4 @@
+/// A macro to configure a lot of types that take a generic const using user defined dimensions.
 #[macro_export]
 macro_rules! config_from_dimensions {
     ($dims:ident) => {

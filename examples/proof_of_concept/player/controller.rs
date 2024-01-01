@@ -22,10 +22,12 @@ pub enum MovementAction {
 
 /// Marker component for flying
 #[derive(Component, Debug)]
+#[component(storage = "SparseSet")]
 pub struct FlyMode;
 
 /// Marker component for no clip
 #[derive(Component, Debug)]
+#[component(storage = "SparseSet")]
 pub struct NoClipMode;
 
 /// A marker component indicating that an entity is using a character controller.

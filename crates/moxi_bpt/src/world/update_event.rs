@@ -4,10 +4,12 @@ use moxi_utils::prelude::*;
 /// An event that is fired when a block is updated.
 #[derive(Event, Clone, Copy, Debug)]
 pub struct BlockWorldUpdateEvent {
-    pub block_pos: BlockPos,
-    pub chunk_cords: ChunkCords,
-    pub block_update: BlockUpdate,
+    pub(crate) block_pos: BlockPos,
+    pub(crate) chunk_cords: ChunkCords,
+    pub(crate) block_update: BlockUpdate,
 }
+
+pub type NewBlockWorldUpdate = In<BlockWorldUpdateEvent>;
 
 /// Whether the update happend to the block itself or to an adjecent block.
 #[derive(Clone, Copy, Debug)]
@@ -16,6 +18,32 @@ pub enum BlockUpdate {
     Pure(BlockUpdateType),
     /// A reaction to an adjecent block being updated. [`Face`] is the direction of said adjecent block.
     Reaction(Face, BlockUpdateType),
+}
+
+impl BlockWorldUpdateEvent {
+    pub fn new(block_pos: BlockPos, chunk_cords: ChunkCords, block_update: BlockUpdate) -> Self {
+        Self {
+            block_pos,
+            chunk_cords,
+            block_update,
+        }
+    }
+
+    pub fn block_pos(&self) -> BlockPos {
+        self.block_pos
+    }
+
+    pub fn chunk_cords(&self) -> ChunkCords {
+        self.chunk_cords
+    }
+
+    pub fn global_block_pos(&self) -> BlockGlobalPos {
+        BlockGlobalPos::new(self.block_pos, self.chunk_cords)
+    }
+
+    pub fn block_update(&self) -> BlockUpdate {
+        self.block_update
+    }
 }
 
 impl BlockUpdate {

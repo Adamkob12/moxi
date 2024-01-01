@@ -9,16 +9,25 @@ use moxi_bpt::prelude::{app::MoxiApp, *};
 use moxi_mesh_utils::prelude::*;
 use moxi_physics::MoxiCollisionLayer;
 use moxi_utils::prelude::{
-    global_block_pos_to_block_trans, point_to_global_block_pos, BlockGlobalPos, BlockPos, Face,
+    global_block_pos_to_block_trans, neighbor_pos, point_to_global_block_pos, BlockGlobalPos,
+    BlockPos, Face,
 };
 
+// Defining some constants for the meshes of the blocks.
+/// The dimensions of the voxel, this is used to generate the mesh.
 const VOXEL_DIMS: [f32; 3] = [1.0, 1.0, 1.0];
+/// The dimensions of the texture atlas, this is for the UV cords of the mesh.
 const TEXTURE_ATLAS_DIMS: [u32; 2] = [10, 10];
+/// The center of the voxel.
 const VOXEL_CENTER: [f32; 3] = [0.0, 0.0, 0.0];
+/// The padding for the texture.
 const PADDING: f32 = 1.0 / 16.0;
+/// The default color intensity for the block mesh.
 const DEFAULT_COLOR_INTENSITY: f32 = 1.0;
+/// The alpha value for the block mesh.
 const ALPHA: f32 = 1.0;
-const PLAYER_STEPPED_ON_BLOCK: BlockUpdateType = BlockUpdateType::from_u128(12);
+/// The block update type for when a player steps on a block.
+const PLAYER_STEPPED_ON_BLOCK: BlockUpdateType = BlockUpdateType::from_u128(0x12222AA);
 
 pub struct BlocksPlugin;
 
@@ -39,20 +48,21 @@ impl Plugin for BlocksPlugin {
 }
 
 fn trigger_if_block_above_isnt_air(
-    block_world_update: In<BlockWorldUpdateEvent>,
+    world_update: In<BlockWorldUpdateEvent>,
     blocks: Blocks,
 ) -> bool {
-    let block_pos = block_world_update.0.block_pos;
-    let chunk_cords = block_world_update.0.chunk_cords;
-    let block_above_pos = block_pos + BlockPos::from([0, 1, 0]);
-
-    blocks.block_name_at(chunk_cords, block_above_pos) != "Air"
+    neighbor_pos(world_update.0.block_pos(), Face::Top, CHUNK_DIMS).map_or(
+        false,
+        |block_above_pos| {
+            blocks.block_name_at(world_update.0.chunk_cords(), block_above_pos) != "Air"
+        },
+    )
 }
 
 fn trigger_if_player_stepped_on(block_world_update: In<BlockWorldUpdateEvent>) -> bool {
     block_world_update
         .0
-        .block_update
+        .block_update()
         .is_pure_and(|block_update| block_update == PLAYER_STEPPED_ON_BLOCK)
 }
 
@@ -63,31 +73,30 @@ fn spawn_falling_block(
     mesh_registry: Res<MeshReg>,
     cube_mesh_material: Res<CubeMeshMaterial>,
 ) {
-    let block_pos = block_world_update.0.block_pos;
-    let chunk_cords = block_world_update.0.chunk_cords;
+    let world_updte = block_world_update.0;
     let sand_block_id = block_id!("Sand");
-    let global_pos = BlockGlobalPos::new(block_pos, chunk_cords);
 
-    blocks.set_block_at_name(chunk_cords, block_pos, "Air");
+    blocks.set_block_at_name(world_updte.chunk_cords(), world_updte.block_pos(), "Air");
 
     commands.spawn(FallingBlockBundle::new(
-        global_pos,
+        world_updte.global_block_pos(),
         mesh_registry.get_block_mesh_handle(&sand_block_id),
         cube_mesh_material.0.clone(),
     ));
 }
 
 fn trigger_falling_block(block_world_update: In<BlockWorldUpdateEvent>, blocks: Blocks) -> bool {
-    let block_pos = block_world_update.0.block_pos;
-    let chunk_cords = block_world_update.0.chunk_cords;
+    let block_pos = block_world_update.0.block_pos();
+    let chunk_cords = block_world_update.0.chunk_cords();
     let mut block_below_pos = block_pos;
-    block_below_pos.y -= 1;
+    block_below_pos.y = block_below_pos.y.checked_sub(1).unwrap_or(0);
     blocks.block_name_at(chunk_cords, block_below_pos) == "Air"
         && !matches!(
-            block_world_update.0.block_update,
+            block_world_update.0.block_update(),
             BlockUpdate::Pure(BLOCK_REMOVED)
         )
 }
+
 fn follow_falling_block(
     mut blocks: BlocksMut,
     mut commands: Commands,
@@ -114,18 +123,18 @@ fn check_if_player_stepped_on_block(
         let BlockGlobalPos { pos, cords, valid } =
             point_to_global_block_pos(global_transform.translation() - Vec3::Y * 1.3, CHUNK_DIMS);
         if valid {
-            block_world_update_events.send(BlockWorldUpdateEvent {
-                block_pos: pos,
-                chunk_cords: cords,
-                block_update: BlockUpdate::Pure(PLAYER_STEPPED_ON_BLOCK),
-            });
+            block_world_update_events.send(BlockWorldUpdateEvent::new(
+                pos,
+                cords,
+                BlockUpdate::Pure(PLAYER_STEPPED_ON_BLOCK),
+            ));
         }
     }
 }
 
 fn transform_into<B: Block>(block_world_update: In<BlockWorldUpdateEvent>, mut blocks: BlocksMut) {
-    let block_pos = block_world_update.0.block_pos;
-    let chunk_cords = block_world_update.0.chunk_cords;
+    let block_pos = block_world_update.0.block_pos();
+    let chunk_cords = block_world_update.0.chunk_cords();
 
     blocks.set_block_at_name(chunk_cords, block_pos, B::get_name());
 }

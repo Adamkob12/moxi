@@ -13,7 +13,6 @@ use chunks::ChunksPlugin;
 use moxi::prelude::*;
 use moxi_mesh_utils::prelude::Aabb;
 use moxi_physics::MoxiCollisionLayer;
-// use moxi_physics::config_physics_from_dimensions;
 use player::PlayerPlugin;
 
 pub(crate) const HEIGHT: u32 = 40;
@@ -22,9 +21,8 @@ pub(crate) const LENGTH: u32 = 12;
 pub(crate) const CHUNK_DIMS: Dimensions = Dimensions::new(WIDTH, HEIGHT, LENGTH);
 
 config_from_dimensions!(CHUNK_DIMS);
-// config_physics_from_dimensions!(CHUNK_DIMS);
 
-fn main() -> Result<(), std::io::Error> {
+fn main() {
     let mut app = App::new();
 
     app.add_plugins((
@@ -41,7 +39,6 @@ fn main() -> Result<(), std::io::Error> {
                 ..Default::default()
             }),
         MoxiBptPlugin::default(),
-        // MoxiPhysicsPlugin::default(),
         BlocksPlugin,
         PlayerPlugin,
         ChunksPlugin,
@@ -56,10 +53,11 @@ fn main() -> Result<(), std::io::Error> {
     app.add_systems(Update, insert_collider_for_chunks);
 
     app.run();
-
-    Ok(())
 }
 
+/// System to insert colliders for chunks, in the future this will likely be abstracted in a
+/// seperate physics plugin, but for now it's user defined. Note this is using bevy_xpbd_3d,
+/// using the rapier game engine shouldn't be much different.
 fn insert_collider_for_chunks(
     mut commands: Commands,
     mesh_chunks_query: Query<Entity, (Changed<Aabb>, With<MeshChunk>)>,

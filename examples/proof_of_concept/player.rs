@@ -1,3 +1,7 @@
+//! This module sets up player logic. Movement, physics, breaking and placing blocks, gamemodes,
+//! etc. It uses bevy_xpbd_3d for physics. But that's not important, rapier should work just as
+//! well. But I recommend bevy_xpbd_3d from personal experience.
+
 #![allow(dead_code)]
 
 mod action;
