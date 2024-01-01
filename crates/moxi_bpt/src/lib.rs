@@ -21,4 +21,33 @@ pub mod prelude {
     pub use super::trigger::*;
     pub use super::world::blockworld::*;
     pub use super::world::*;
+    pub use super::{block_id, block_name, get_block_id, get_block_name};
+}
+
+#[macro_export]
+macro_rules! get_block_id {
+    ($name:expr) => {
+        BLOCKS_GLOBAL::get_id($name)
+    };
+}
+
+#[macro_export]
+macro_rules! get_block_name {
+    ($id:expr) => {
+        BLOCKS_GLOBAL::get_name($id)
+    };
+}
+
+#[macro_export]
+macro_rules! block_id {
+    ($name:expr) => {
+        BLOCKS_GLOBAL::id($name)
+    };
+}
+
+#[macro_export]
+macro_rules! block_name {
+    ($id:expr) => {
+        BLOCKS_GLOBAL::name($id)
+    };
 }

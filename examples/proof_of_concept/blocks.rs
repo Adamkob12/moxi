@@ -65,7 +65,7 @@ fn spawn_falling_block(
 ) {
     let block_pos = block_world_update.0.block_pos;
     let chunk_cords = block_world_update.0.chunk_cords;
-    let sand_block_id = BLOCKS_GLOBAL::id("Sand");
+    let sand_block_id = block_id!("Sand");
     let global_pos = BlockGlobalPos::new(block_pos, chunk_cords);
 
     blocks.set_block_at_name(chunk_cords, block_pos, "Air");

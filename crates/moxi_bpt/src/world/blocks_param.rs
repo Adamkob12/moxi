@@ -1,8 +1,8 @@
 use crate::chunk::components::{ChildMeshChunks, ChunkGrid};
 use crate::chunk::resources::ChunkMap;
 use crate::prelude::{
-    BlockIdtoEnt, BlockMarker, BlockName, GlobalBlockBreak, GlobalBlockPlace, BLOCKS_GLOBAL,
-    PLACEHOLDER_DIMS,
+    block_id, get_block_name, BlockIdtoEnt, BlockMarker, BlockName, GlobalBlockBreak,
+    GlobalBlockPlace, BLOCKS_GLOBAL, PLACEHOLDER_DIMS,
 };
 use bevy_ecs::prelude::*;
 use bevy_ecs::system::SystemParam;
@@ -65,7 +65,7 @@ impl<'w, 's, const N: usize> _BlocksMut<'w, 's, N> {
         block_pos: BlockPos,
         block_name: &'static str,
     ) {
-        let block_id = BLOCKS_GLOBAL::id(block_name);
+        let block_id = block_id!(block_name);
         self.set_block_at_id(chunk_cords, block_pos, block_id);
     }
 }
@@ -79,7 +79,7 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
         let chunk = self.chunk_map.get_chunk(chunk_cords)?;
         let chunk = self.chunks_query.get(chunk).ok()?;
         let block_id = chunk.0.get_block(block_pos)?;
-        BLOCKS_GLOBAL::get_name(block_id)
+        get_block_name!(block_id)
     }
 
     pub fn block_name_at(&self, chunk_cords: ChunkCords, block_pos: BlockPos) -> &'static str {
@@ -174,7 +174,7 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
                 let neighbor_block_pos = gbp.pos;
                 if neighbor_chunk_cords == chunk_cords {
                     let block_id = chunk.0.get_block(neighbor_block_pos).unwrap_or(0);
-                    BLOCKS_GLOBAL::get_name(block_id)
+                    get_block_name!(block_id)
                 } else {
                     self.get_block_name_at(neighbor_chunk_cords, neighbor_block_pos)
                 }

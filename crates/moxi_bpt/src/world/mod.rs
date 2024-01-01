@@ -10,6 +10,7 @@ pub use update_event::*;
 mod tests {
     use super::blockworld::*;
     use crate::blockreg::meshreg::MeshReg;
+    use crate::prelude::*;
     use bevy_asset::Assets;
     use bevy_ecs::prelude::*;
     use bevy_render::mesh::Mesh;
@@ -144,7 +145,7 @@ mod tests {
             );
 
         let block_entity = {
-            let block_id = BLOCKS_GLOBAL::get_id("Block1").unwrap();
+            let block_id = get_block_id!("Block1").unwrap();
             let block_id_to_ent = world.resource::<BlockIdtoEnt>();
             let block_entity = block_id_to_ent.0.get(&block_id).unwrap();
             *block_entity

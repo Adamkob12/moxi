@@ -15,15 +15,26 @@ use bevy_ecs::{
 use bevy_pbr::StandardMaterial;
 
 pub use components::{Chunk, MeshChunk};
+use moxi_utils::prelude::ChunkCords;
 pub use resources::CurrentChunk;
 
-pub struct ChunkPlugin<const N: usize>;
+pub struct MoxiChunkPlugin<const N: usize> {
+    pub starting_chunk: ChunkCords,
+}
 
-impl<const N: usize> Plugin for ChunkPlugin<N> {
+impl<const N: usize> Default for MoxiChunkPlugin<N> {
+    fn default() -> Self {
+        Self {
+            starting_chunk: [0, 0].into(),
+        }
+    }
+}
+
+impl<const N: usize> Plugin for MoxiChunkPlugin<N> {
     fn build(&self, app: &mut bevy_app::App) {
         app.init_resource::<resources::ChunkMap>()
             .init_resource::<resources::ChunkQueue>()
-            .insert_resource(CurrentChunk([0, 0].into()));
+            .insert_resource(CurrentChunk(self.starting_chunk));
         app.add_systems(
             Update,
             (

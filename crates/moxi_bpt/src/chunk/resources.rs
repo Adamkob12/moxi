@@ -3,12 +3,17 @@ use std::collections::hash_map::HashMap;
 use bevy_ecs::{entity::Entity, system::Resource};
 use moxi_utils::prelude::ChunkCords;
 
+/// Resource that stores all the chunks in the world.
+/// The key is the chunk's cords, the value is the chunk's entity.
+/// If the chunk is currently being loaded, the value will be `Entity::PLACEHOLDER`.
 #[derive(Resource)]
 pub struct ChunkMap(HashMap<ChunkCords, Entity>);
 
 #[derive(Resource)]
-pub struct ChunkQueue(Vec<ChunkCords>);
+pub(crate) struct ChunkQueue(Vec<ChunkCords>);
 
+/// The current chunk is a resource that the plugin will refer to for the player's position.
+/// Chunks will be loaded and unloaded based on the `CurrentChunk` resource.
 #[derive(Resource)]
 pub struct CurrentChunk(pub ChunkCords);
 

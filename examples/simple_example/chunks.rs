@@ -44,13 +44,13 @@ impl ChunkBuilder<BLOCKS_IN_CHUNK, BlockId> for FlatChunkBuilder {
             .map(|(i, _)| {
                 let block_pos = index_to_pos(i, CHUNK_DIMS).unwrap();
                 if block_pos.y == self.sea_level {
-                    BLOCKS_GLOBAL::get_id("Grass").unwrap()
+                    get_block_id!("Grass").unwrap()
                 } else if block_pos.y < self.sea_level - 3 {
-                    BLOCKS_GLOBAL::get_id("Stone").unwrap()
+                    get_block_id!("Stone").unwrap()
                 } else if block_pos.y < self.sea_level {
-                    BLOCKS_GLOBAL::get_id("Dirt").unwrap()
+                    get_block_id!("Dirt").unwrap()
                 } else {
-                    BLOCKS_GLOBAL::get_id("Air").unwrap()
+                    get_block_id!("Air").unwrap()
                 }
             })
             .collect::<Vec<_>>()
