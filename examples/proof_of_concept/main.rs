@@ -3,16 +3,22 @@ mod chunks;
 mod player;
 
 use bevy::{prelude::*, window::WindowResolution};
-use bevy_xpbd_3d::prelude::PhysicsPlugins;
+use bevy_xpbd_3d::prelude::{
+    AsyncCollider, CollisionLayers, ComputedCollider, PhysicsPlugins, RigidBody, TriMeshFlags,
+};
+
+pub use bevy_moxi as moxi;
 pub use blocks::*;
 use chunks::ChunksPlugin;
 use moxi::prelude::*;
-use moxi_physics::config_physics_from_dimensions;
+use moxi_mesh_utils::prelude::Aabb;
+use moxi_physics::MoxiCollisionLayer;
+// use moxi_physics::config_physics_from_dimensions;
 use player::PlayerPlugin;
 
-pub(crate) const HEIGHT: u32 = 16;
-pub(crate) const WIDTH: u32 = 16;
-pub(crate) const LENGTH: u32 = 16;
+pub(crate) const HEIGHT: u32 = 40;
+pub(crate) const WIDTH: u32 = 12;
+pub(crate) const LENGTH: u32 = 12;
 pub(crate) const CHUNK_DIMS: Dimensions = Dimensions::new(WIDTH, HEIGHT, LENGTH);
 
 config_from_dimensions!(CHUNK_DIMS);
@@ -47,7 +53,27 @@ fn main() -> Result<(), std::io::Error> {
         brightness: 0.8,
     });
 
+    app.add_systems(Update, insert_collider_for_chunks);
+
     app.run();
 
     Ok(())
+}
+
+fn insert_collider_for_chunks(
+    mut commands: Commands,
+    mesh_chunks_query: Query<Entity, (Changed<Aabb>, With<MeshChunk>)>,
+) {
+    for mesh_chunk_entity in mesh_chunks_query.iter() {
+        commands
+            .entity(mesh_chunk_entity)
+            .insert(AsyncCollider(ComputedCollider::TriMeshWithFlags(
+                TriMeshFlags::MERGE_DUPLICATE_VERTICES,
+            )))
+            .insert(RigidBody::Static)
+            .insert(
+                CollisionLayers::all_masks::<MoxiCollisionLayer>()
+                    .add_group(MoxiCollisionLayer::Terrain),
+            );
+    }
 }

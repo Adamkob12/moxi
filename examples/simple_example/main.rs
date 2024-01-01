@@ -4,6 +4,7 @@ mod player;
 
 use bevy::{prelude::*, window::WindowResolution};
 use bevy_flycam::prelude::NoCameraPlayerPlugin;
+pub use bevy_moxi as moxi;
 pub use blocks::*;
 use chunks::ChunksPlugin;
 use moxi::prelude::*;

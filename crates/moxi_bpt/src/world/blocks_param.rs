@@ -2,12 +2,13 @@ use crate::chunk::components::{ChildMeshChunks, ChunkGrid};
 use crate::chunk::resources::ChunkMap;
 use crate::prelude::{
     BlockIdtoEnt, BlockMarker, BlockName, GlobalBlockBreak, GlobalBlockPlace, BLOCKS_GLOBAL,
+    PLACEHOLDER_DIMS,
 };
 use bevy_ecs::prelude::*;
 use bevy_ecs::system::SystemParam;
 use moxi_utils::prelude::{
-    global_enumerate_neighboring_blocks, BlockGlobalPos, BlockId, BlockPos, ChunkCords, Dimensions,
-    Face, Grid, SurroundingBlocks,
+    global_enumerate_neighboring_blocks, BlockGlobalPos, BlockId, BlockPos, ChunkCords, Face, Grid,
+    SurroundingBlocks,
 };
 
 #[derive(SystemParam)]
@@ -103,8 +104,6 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
         Some(&chunk.0 .0)
     }
 
-    const PLACEHOLDER_DIMS: Dimensions = Dimensions::new(16, 16, 16);
-
     pub fn get_global_surrounding_blocks(
         &self,
         chunk_cords: ChunkCords,
@@ -117,7 +116,7 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
         }
         let chunk_grid = self.chunks_query.get(chunk_entity.unwrap()).unwrap().0;
         let global_block_pos = BlockGlobalPos::new(block_pos, chunk_cords);
-        global_enumerate_neighboring_blocks(global_block_pos, Self::PLACEHOLDER_DIMS)
+        global_enumerate_neighboring_blocks(global_block_pos, unsafe { PLACEHOLDER_DIMS })
             .map(|(face, gbp)| {
                 let neighbor_chunk_cords = gbp.cords;
                 let neighbor_block_pos = gbp.pos;
@@ -145,7 +144,7 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
         let chunk = self.chunk_map.get_chunk(chunk_cords).unwrap();
         let chunk = self.chunks_query.get(chunk).unwrap().0;
         let global_block_pos = BlockGlobalPos::new(block_pos, chunk_cords);
-        global_enumerate_neighboring_blocks(global_block_pos, Self::PLACEHOLDER_DIMS)
+        global_enumerate_neighboring_blocks(global_block_pos, unsafe { PLACEHOLDER_DIMS })
             .map(|(_, gbp)| {
                 let neighbor_chunk_cords = gbp.cords;
                 let neighbor_block_pos = gbp.pos;
@@ -169,7 +168,7 @@ impl<'w, 's, const N: usize> _Blocks<'w, 's, N> {
         let chunk = self.chunk_map.get_chunk(chunk_cords).unwrap();
         let chunk = self.chunks_query.get(chunk).unwrap().0;
         let global_block_pos = BlockGlobalPos::new(block_pos, chunk_cords);
-        global_enumerate_neighboring_blocks(global_block_pos, Self::PLACEHOLDER_DIMS)
+        global_enumerate_neighboring_blocks(global_block_pos, unsafe { PLACEHOLDER_DIMS })
             .map(|(_, gbp)| {
                 let neighbor_chunk_cords = gbp.cords;
                 let neighbor_block_pos = gbp.pos;

@@ -118,7 +118,7 @@ where
 pub type ActionSet = Vec<Action>;
 pub trait CommonActionSet {
     fn get_ids(&self) -> Vec<std::any::TypeId>;
-    fn enumerate_ids_and_actions(self) -> Vec<(std::any::TypeId, Action)>;
+    fn enumerate_ids_and_actions(self) -> impl Iterator<Item = (std::any::TypeId, Action)>;
 }
 
 impl CommonActionSet for ActionSet {
@@ -126,10 +126,8 @@ impl CommonActionSet for ActionSet {
         self.iter().map(|action| action.get_id()).collect()
     }
 
-    fn enumerate_ids_and_actions(self) -> Vec<(std::any::TypeId, Action)> {
-        self.into_iter()
-            .map(|action| (action.get_id(), action))
-            .collect()
+    fn enumerate_ids_and_actions(self) -> impl Iterator<Item = (std::any::TypeId, Action)> {
+        self.into_iter().map(|action| (action.get_id(), action))
     }
 }
 

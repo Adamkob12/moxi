@@ -1,5 +1,4 @@
-use super::BLOCKS_IN_CHUNK;
-use crate::{player::PhysicalPlayer, CHUNK_DIMS};
+use crate::{player::PhysicalPlayer, Blocks, BlocksMut, CHUNK_DIMS};
 use bevy::prelude::*;
 use bevy_xpbd_3d::prelude::{
     CoefficientCombine, Collider, CollisionLayers, Friction, GravityScale, LinearVelocity,
@@ -12,9 +11,6 @@ use moxi_physics::MoxiCollisionLayer;
 use moxi_utils::prelude::{
     global_block_pos_to_block_trans, point_to_global_block_pos, BlockGlobalPos, BlockPos, Face,
 };
-
-pub type Blocks<'w, 's> = _Blocks<'w, 's, BLOCKS_IN_CHUNK>;
-pub type BlocksMut<'w, 's> = _BlocksMut<'w, 's, BLOCKS_IN_CHUNK>;
 
 const VOXEL_DIMS: [f32; 3] = [1.0, 1.0, 1.0];
 const TEXTURE_ATLAS_DIMS: [u32; 2] = [10, 10];

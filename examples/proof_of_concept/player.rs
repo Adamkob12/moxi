@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 mod action;
 mod controller;
 mod misc_systems;
@@ -20,9 +22,9 @@ use bevy::{
     },
     prelude::*,
 };
+use bevy_moxi::prelude::{ChunkCords, CurrentChunk, RENDER_DISTANCE};
 use bevy_xpbd_3d::prelude::*;
 pub use controller::*;
-use moxi::prelude::{ChunkCords, CurrentChunk, RENDER_DISTANCE};
 use moxi_utils::prelude::*;
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

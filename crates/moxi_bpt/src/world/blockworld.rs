@@ -11,8 +11,8 @@ use lazy_static::lazy_static;
 use moxi_mesh_utils::prelude::{BlockMeshType, MeshRegistry};
 use moxi_mesh_utils::BlockMeshChange;
 use moxi_utils::prelude::{
-    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords, NDir,
-    SurroundingBlocks, SurroundingBlocksCommon, FACES,
+    is_block_pos_on_edge, neighbor_across_chunk, to_cords, BlockId, BlockPos, ChunkCords,
+    Dimensions, NDir, SurroundingBlocks, SurroundingBlocksCommon, FACES,
 };
 use prelude::{Block, BlockRegistry, CommonActionSet, IntoTrigger};
 use std::any::TypeId;
@@ -26,6 +26,7 @@ lazy_static! {
         Mutex::new(HashMap::new());
     pub static ref BLOCKS_GLOBAL: () = ();
 }
+pub static mut PLACEHOLDER_DIMS: Dimensions = Dimensions::new(16, 16, 16);
 
 impl BLOCKS_GLOBAL {
     pub fn get_id(name: &'static str) -> Option<BlockId> {

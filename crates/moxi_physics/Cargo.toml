@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 bevy_ecs = "0.12"
 bevy_app = "0.12"
-bevy_xpbd_3d = "0.3"
+bevy_xpbd_3d = { git = "https://github.com/Jondolf/bevy_xpbd.git" }
 moxi_bpt = { path = "../moxi_bpt" }
 moxi_mesh_utils = { path = "../moxi_mesh_utils" }
 moxi_utils = { path = "../moxi_utils" }

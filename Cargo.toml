@@ -1,14 +1,15 @@
 [package]
-name = "moxi"
-version = "0.1.0"
+name = "bevy_moxi"
+version = "0.0.1"
 authors = ["Adamkob12 <Github: Adamkob12>"]
-description = "A simple, easy to use, wrapper / abstraction layer on the Bevy game engine that allows the creation of Block based games."
+description = "A simple plugin / library for Bevy, that makes it trivial to define the logic of block games."
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/Adamkob12/Moxi"
 keywords = [
   "moxi",
   "bevy",
+  "bevy_moxi",
   "block",
   "game",
   "voxel",
@@ -40,7 +41,7 @@ moxi_ui = { path = "crates/moxi_ui" }
 [dev-dependencies]
 bevy = "0.12"
 bevy_flycam = "*"
-bevy_xpbd_3d = "*"
+bevy_xpbd_3d = { git = "https://github.com/Jondolf/bevy_xpbd.git" }
 bevy_mod_debugdump = "0.9"
 bevy_framepace = "0.14"
 

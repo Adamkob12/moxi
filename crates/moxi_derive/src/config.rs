@@ -10,6 +10,9 @@ macro_rules! config_from_dimensions {
         impl Plugin for MoxiBptPlugin {
             fn build(&self, app: &mut App) {
                 self.0.build(app);
+                unsafe {
+                    PLACEHOLDER_DIMS = _CHUNK_DIMS;
+                }
             }
         }
         impl Default for MoxiBptPlugin {

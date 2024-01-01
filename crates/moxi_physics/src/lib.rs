@@ -1,3 +1,5 @@
+//! WIP, still not ready
+
 mod config_macro;
 
 use bevy_app::Update;
