@@ -1,5 +1,5 @@
 use bevy::app::{App, Plugin};
-use moxi_bpt::prelude::{app::MoxiApp, *};
+use moxi_bpta::prelude::{app::MoxiApp, *};
 use moxi_mesh_utils::prelude::*;
 use moxi_utils::prelude::Face;
 

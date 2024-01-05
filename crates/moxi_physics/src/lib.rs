@@ -15,7 +15,7 @@ use bevy_xpbd_3d::{
     parry::{bounding_volume::Aabb, na::Isometry3},
     prelude::{Collider, CollisionLayers, PhysicsLayer, RigidBody, TriMeshFlags},
 };
-use moxi_bpt::prelude::{Chunk, CurrentChunk, MeshReg, StaticBlockQuery, _Blocks};
+use moxi_bpta::prelude::{Chunk, CurrentChunk, MeshReg, StaticBlockQuery, _Blocks};
 use moxi_mesh_utils::prelude::{Aabb as BevyAabb, MeshRegistryCommon};
 use moxi_utils::prelude::{chunk_distance, BlockPos, ChunkCords};
 

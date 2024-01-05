@@ -1,5 +1,5 @@
 [package]
-name = "moxi_bpt"
+name = "moxi_bpta"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,7 +9,6 @@ edition = "2021"
 bevy_tasks = { version = "0.12", features = ["multi-threaded"] }
 bevy_ecs = "0.12"
 bevy_asset = "0.12"
-bevy_reflect = "0.12"
 bevy_render = "0.12"
 bevy_app = "0.12"
 bevy_hierarchy = "0.12"

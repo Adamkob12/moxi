@@ -1,11 +1,10 @@
 use bevy_asset::Handle;
 use bevy_ecs::system::Resource;
-use bevy_reflect::Reflect;
 use bevy_render::mesh::Mesh;
 use moxi_mesh_utils::prelude::{BlockMesh, BlockMeshRef, BlockMeshType, MeshRegistry};
 use moxi_utils::prelude::BlockId;
 
-#[derive(Reflect, Resource, Default, Clone)]
+#[derive(Resource, Default, Clone)]
 pub struct MeshReg {
     pub(crate) meshes: Vec<BlockMesh>,
     pub(crate) handles: Vec<Handle<Mesh>>,

@@ -5,7 +5,7 @@ use bevy_xpbd_3d::prelude::{
     LockedAxes, MassPropertiesBundle, Restitution, RigidBody, ShapeCaster, ShapeHits,
     SpatialQueryFilter,
 };
-use moxi_bpt::prelude::{app::MoxiApp, *};
+use moxi_bpta::prelude::{app::MoxiApp, *};
 use moxi_mesh_utils::prelude::*;
 use moxi_physics::MoxiCollisionLayer;
 use moxi_utils::prelude::{

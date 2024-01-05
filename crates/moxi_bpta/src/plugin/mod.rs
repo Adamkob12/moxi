@@ -14,7 +14,7 @@ use blockworld::{global_block_breaker, global_block_placer, GlobalBlockBreak, Gl
 use chunk::MoxiChunkPlugin;
 use prelude::Block;
 
-pub struct _MoxiBptPlugin<const N: usize>;
+pub struct _MoxiBptaPlugin<const N: usize>;
 
 pub struct Air;
 
@@ -26,7 +26,7 @@ impl Block for Air {
     }
 }
 
-impl<const N: usize> Plugin for _MoxiBptPlugin<N> {
+impl<const N: usize> Plugin for _MoxiBptaPlugin<N> {
     fn build(&self, app: &mut bevy_app::App) {
         app.add_plugins(MoxiChunkPlugin::<N>::default());
         app.add_event::<BlockWorldUpdateEvent>()

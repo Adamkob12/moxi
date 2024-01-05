@@ -32,7 +32,7 @@ fn main() {
                 }),
                 ..Default::default()
             }),
-        _MoxiBptPlugin::<BLOCKS_IN_CHUNK>,
+        _MoxiBptaPlugin::<BLOCKS_IN_CHUNK>,
         BlocksPlugin,
         NoCameraPlayerPlugin,
         PlayerPlugin,

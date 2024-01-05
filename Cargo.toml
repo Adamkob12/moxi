@@ -33,7 +33,7 @@ members = ["crates/*"]
 [dependencies]
 moxi_utils = { path = "crates/moxi_utils" }
 moxi_mesh_utils = { path = "crates/moxi_mesh_utils" }
-moxi_bpt = { path = "crates/moxi_bpt" }
+moxi_bpta = { path = "crates/moxi_bpta" }
 moxi_derive = { path = "crates/moxi_derive" }
 moxi_physics = { path = "crates/moxi_physics" }
 moxi_ui = { path = "crates/moxi_ui" }

@@ -38,7 +38,7 @@ fn main() {
                 }),
                 ..Default::default()
             }),
-        MoxiBptPlugin::default(),
+        MoxiBptaPlugin::default(),
         BlocksPlugin,
         PlayerPlugin,
         ChunksPlugin,

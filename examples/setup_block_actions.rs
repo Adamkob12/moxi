@@ -21,9 +21,9 @@ config_from_dimensions!(CHUNK_DIMS); // This macro configures a lot of types tha
 
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, MoxiBptPlugin::default())); // add the plugin
+    app.add_plugins((DefaultPlugins, MoxiBptaPlugin::default())); // add the plugin
     app.init_block::<MyBlock>() // Init a block
-        .with_block_actions(trigger1, action2, ()) // define block actions
+        .with_block_actions(trigger1, (action2, action2, action2), ()) // define block actions
         .with_block_actions(trigger2, action2, action1) // we can add as many block actions as we
         // want, also, we can use the same trigger for multiple actions, or multiple actions for
         // several block actions

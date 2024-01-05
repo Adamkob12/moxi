@@ -12,7 +12,7 @@ config_from_dimensions!(CHUNK_DIMS); // This macro configures a lot of types tha
                                      // a generic const. The macro is optional but highly recommended.
 fn main() {
     let mut app = App::new();
-    app.add_plugins((DefaultPlugins, MoxiBptPlugin::default())); // add the plugin
+    app.add_plugins((DefaultPlugins, MoxiBptaPlugin::default())); // add the plugin
     app.insert_resource(BoxedBuilder {
         // The mandatory resource that defines how to build chunks.
         builder: Arc::new(MyChunkBuilder { sea_level: 8 }),

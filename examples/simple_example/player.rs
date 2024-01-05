@@ -1,7 +1,7 @@
 use crate::*;
 use bevy::prelude::*;
 use bevy_flycam::FlyCam;
-use moxi_bpt::prelude::CurrentChunk;
+use moxi_bpta::prelude::CurrentChunk;
 
 pub struct PlayerPlugin;
 

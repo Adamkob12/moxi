@@ -7,8 +7,8 @@ macro_rules! config_from_dimensions {
             _CHUNK_DIMS.x as usize * _CHUNK_DIMS.y as usize * _CHUNK_DIMS.z as usize;
         pub type Blocks<'w, 's> = moxi::prelude::_Blocks<'w, 's, BLOCKS_IN_CHUNK>;
         pub type BlocksMut<'w, 's> = moxi::prelude::_BlocksMut<'w, 's, BLOCKS_IN_CHUNK>;
-        pub struct MoxiBptPlugin(moxi::prelude::_MoxiBptPlugin<BLOCKS_IN_CHUNK>);
-        impl Plugin for MoxiBptPlugin {
+        pub struct MoxiBptaPlugin(moxi::prelude::_MoxiBptaPlugin<BLOCKS_IN_CHUNK>);
+        impl Plugin for MoxiBptaPlugin {
             fn build(&self, app: &mut App) {
                 self.0.build(app);
                 unsafe {
@@ -16,13 +16,13 @@ macro_rules! config_from_dimensions {
                 }
             }
         }
-        impl Default for MoxiBptPlugin {
+        impl Default for MoxiBptaPlugin {
             fn default() -> Self {
-                Self(moxi::prelude::_MoxiBptPlugin::<BLOCKS_IN_CHUNK>)
+                Self(moxi::prelude::_MoxiBptaPlugin::<BLOCKS_IN_CHUNK>)
             }
         }
-        impl std::ops::Deref for MoxiBptPlugin {
-            type Target = moxi::prelude::_MoxiBptPlugin<BLOCKS_IN_CHUNK>;
+        impl std::ops::Deref for MoxiBptaPlugin {
+            type Target = moxi::prelude::_MoxiBptaPlugin<BLOCKS_IN_CHUNK>;
             fn deref(&self) -> &Self::Target {
                 &self.0
             }
